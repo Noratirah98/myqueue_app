@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>QR Check-In</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- VALID APPOINTMENT -->
+  <div *ngIf="hasValidAppointment" class="valid-box">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <h2>Appointment Found</h2>
+    <p>{{ todayAppointment.appointmentType }}</p>
+    <p>{{ todayAppointment.date }} | {{ todayAppointment.time }}</p>
+
+    <ion-button expand="block" (click)="startScan()">
+      Scan QR Code
+    </ion-button>
+  </div>
+
+  <!-- NO APPOINTMENT -->
+  <div *ngIf="!hasValidAppointment" class="invalid-box">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <h2>No Appointment Today</h2>
+    <p>You can only check in on the day of your appointment.</p>
+
+    <ion-button expand="block" fill="outline" routerLink="/appointment-list">
+      View Appointments
+    </ion-button>
+  </div>
+
+</ion-content>

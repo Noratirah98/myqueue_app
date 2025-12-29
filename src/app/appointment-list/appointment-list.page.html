@@ -1,0 +1,285 @@
+<ion-header [translucent]="true" class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button color="light" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <span>My Appointments</span>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="light" (click)="bookNewAppointment()">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Enhanced Segment Tabs -->
+  <ion-toolbar class="segment-toolbar">
+    <ion-segment [value]="selectedSegment" (ionChange)="segmentChanged($event)" class="modern-segment">
+      <ion-segment-button value="upcoming" class="segment-btn">
+        <ion-label>
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Upcoming</span>
+        </ion-label>
+        <ion-badge *ngIf="upcomingAppointments.length > 0" class="count-badge">
+          {{ upcomingAppointments.length }}
+        </ion-badge>
+      </ion-segment-button>
+
+      <ion-segment-button value="past" class="segment-btn">
+        <ion-label>
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+          <span>Past</span>
+        </ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="cancelled" class="segment-btn">
+        <ion-label>
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <span>Cancelled</span>
+        </ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="modern-content">
+
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" pullingText="Pull to refresh"
+      refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner-wrapper">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+    <p>Loading appointments...</p>
+  </div>
+
+  <div class="content-wrapper" *ngIf="!loading">
+
+    <!-- UPCOMING APPOINTMENTS -->
+    <div *ngIf="selectedSegment === 'upcoming'" class="appointments-section">
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="upcomingAppointments.length === 0">
+        <div class="empty-icon-wrapper">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <h3>No Upcoming Appointments</h3>
+        <p>You don't have any scheduled appointments yet. Book your next appointment now.</p>
+        <ion-button expand="block" (click)="bookNewAppointment()" class="cta-button">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Book New Appointment
+        </ion-button>
+      </div>
+
+      <!-- Appointment Cards -->
+      <ion-card *ngFor="let appt of upcomingAppointments" class="appointment-card upcoming-card"
+        (click)="showAppointmentOptions(appt)">
+
+        <div class="card-accent upcoming-accent"></div>
+
+        <div class="countdown-badge">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>{{ getDaysUntilText(appt.date) }}</span>
+        </div>
+
+        <ion-card-content>
+          <div class="card-header">
+            <div class="appointment-type">
+              <!-- <div class="type-icon">📅</div> -->
+              <div class="type-info">
+                <h3 class="type-name">{{ appt.appointmentType }}</h3>
+                <span class="type-label">Medical Appointment</span>
+              </div>
+            </div>
+            <ion-badge [color]="getStatusColor(appt.status)" class="status-badge">
+              <!-- <ion-icon name="checkmark-circle"></ion-icon> -->
+              {{ getStatusText(appt.status) }}
+            </ion-badge>
+          </div>
+
+          <div class="appointment-details">
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Date</span>
+                <p class="detail-value">{{ formatDate(appt.date) }}</p>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="time-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Time</span>
+                <p class="detail-value">{{ appt.time }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <ion-button size="small" fill="solid" (click)="viewAppointmentDetails(appt); $event.stopPropagation()"
+              class="action-btn primary-action">
+              <ion-icon slot="start" name="information-circle-outline"></ion-icon>
+              Details
+            </ion-button>
+
+            <ion-button size="small" fill="outline" color="danger"
+              (click)="cancelAppointment(appt); $event.stopPropagation()" class="action-btn danger-action">
+              <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+              Cancel
+            </ion-button>
+          </div>
+        </ion-card-content>
+
+      </ion-card>
+    </div>
+
+    <!-- PAST APPOINTMENTS -->
+    <div *ngIf="selectedSegment === 'past'" class="appointments-section">
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="pastAppointments.length === 0">
+        <div class="empty-icon-wrapper">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <h3>No Past Records</h3>
+        <p>No completed appointments found in your history.</p>
+      </div>
+
+      <!-- Appointment Cards -->
+      <ion-card *ngFor="let appt of pastAppointments" class="appointment-card past-card"
+        (click)="viewAppointmentDetails(appt)">
+
+        <div class="card-accent past-accent"></div>
+
+        <ion-card-content>
+          <div class="card-header">
+            <div class="appointment-type">
+              <!-- <div class="type-icon">✅</div> -->
+              <div class="type-info">
+                <h3 class="type-name">{{ appt.appointmentType }}</h3>
+                <span class="type-label">Completed Visit</span>
+              </div>
+            </div>
+            <ion-badge color="success" class="status-badge">
+              <ion-icon name="checkmark-done"></ion-icon>
+              Completed
+            </ion-badge>
+          </div>
+
+          <div class="appointment-details">
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Date</span>
+                <p class="detail-value">{{ formatDate(appt.date) }}</p>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="time-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Time</span>
+                <p class="detail-value">{{ appt.time }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="view-indicator">
+            <span>Tap to view details</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
+        </ion-card-content>
+
+      </ion-card>
+    </div>
+
+    <!-- CANCELLED APPOINTMENTS -->
+    <div *ngIf="selectedSegment === 'cancelled'" class="appointments-section">
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="cancelledAppointments.length === 0">
+        <div class="empty-icon-wrapper">
+          <ion-icon name="close-circle-outline"></ion-icon>
+        </div>
+        <h3>No Cancelled Appointments</h3>
+        <p>No cancellation records found.</p>
+      </div>
+
+      <!-- Appointment Cards -->
+      <ion-card *ngFor="let appt of cancelledAppointments" class="appointment-card cancelled-card"
+        (click)="viewAppointmentDetails(appt)">
+
+        <div class="card-accent cancelled-accent"></div>
+
+        <ion-card-content>
+          <div class="card-header">
+            <div class="appointment-type">
+              <!-- <div class="type-icon">❌</div> -->
+              <div class="type-info">
+                <h3 class="type-name">{{ appt.appointmentType }}</h3>
+                <span class="type-label">Cancelled Appointment</span>
+              </div>
+            </div>
+            <ion-badge color="danger" class="status-badge">
+              <ion-icon name="close-circle"></ion-icon>
+              Cancelled
+            </ion-badge>
+          </div>
+
+          <div class="appointment-details">
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="calendar-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Date</span>
+                <p class="detail-value">{{ formatDate(appt.date) }}</p>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">
+                <ion-icon name="time-outline"></ion-icon>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Time</span>
+                <p class="detail-value">{{ appt.time }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="view-indicator">
+            <span>Tap to view details</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
+        </ion-card-content>
+
+      </ion-card>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- Floating Action Button -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="!loading" class="fab-container">
+  <ion-fab-button color="primary" (click)="bookNewAppointment()" class="main-fab">
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

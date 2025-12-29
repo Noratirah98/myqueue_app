@@ -1,0 +1,14 @@
+
+.valid-box, .invalid-box {
+  text-align: center;
+  margin-top: 60px;
+}
+
+ion-icon {
+  font-size: 80px;
+  color: var(--ion-color-primary);
+}
+
+.invalid-box ion-icon {
+  color: var(--ion-color-danger);
+}

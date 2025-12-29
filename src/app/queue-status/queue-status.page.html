@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>My Queue Status</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding queue-bg">
+
+  <!-- Your Queue Number -->
+  <ion-card class="queue-card highlight">
+    <ion-card-header>
+      <ion-item lines="none">
+        <ion-icon name="ticket-outline" slot="start"></ion-icon>
+        <ion-label>Your Queue Number</ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content>
+      <h1>{{ myQueueNumber }}</h1>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Current Number Serving -->
+  <ion-card class="queue-card">
+    <ion-card-header>
+      <ion-item lines="none">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-label>Current Number Being Served</ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content>
+      <h1>{{ currentNumber }}</h1>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- People Ahead -->
+  <ion-card class="queue-card">
+    <ion-card-header>
+      <ion-item lines="none">
+        <ion-icon name="walk-outline" slot="start"></ion-icon>
+        <ion-label>People Ahead of You</ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content>
+      <h1>{{ peopleAhead }}</h1>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Status -->
+  <ion-card class="queue-card status-card">
+    <ion-card-header>
+      <ion-item lines="none">
+        <ion-icon name="pulse-outline" slot="start"></ion-icon>
+        <ion-label>Status</ion-label>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content>
+      <p class="status-badge" [ngClass]="status">
+        {{ status | titlecase }}
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

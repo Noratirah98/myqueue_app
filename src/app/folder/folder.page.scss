@@ -1,0 +1,120 @@
+ion-header {
+  ion-toolbar,
+  ion-item {
+    --background: linear-gradient(
+      90deg,
+      rgb(76 146 140) 0%,
+      rgb(85 175 165) 35%,
+      rgb(89 183 173) 100%
+    );
+    background: linear-gradient(
+      90deg,
+      rgb(76 146 140) 0%,
+      rgb(85 175 165) 35%,
+      rgb(89 183 173) 100%
+    );
+    padding: 0 10px;
+  }
+
+  ion-toolbar {
+    .bordered {
+      --border-radius: 10px;
+      // --box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+    }
+  }
+
+  ion-item {
+    --min-height: 74px;
+
+    h3 {
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    p {
+      font-weight: 500;
+      font-size: 14px;
+      color: #3d3d3d;
+    }
+
+    ion-thumbnail {
+      width: 60px;
+      height: 60px;
+      --border-radius: 50%;
+      border: 7px solid #3d837b;
+      margin-right: 14px;
+    }
+  }
+}
+
+ion-content {
+  --background: #f5f9f9;
+
+  .container_main {
+    ion-grid {
+      width: 100%;
+      left: 0;
+
+      ion-card {
+        box-shadow: -1px 11px 13px -6px rgb(87, 86, 86);
+        border-radius: 10px !important;
+        margin: 10px 0;
+
+        ion-thumbnail {
+          width: 8vh;
+          height: 8vh;
+          border-radius: 20px;
+          background: rgba(76, 146, 140, 0.1);
+
+          img {
+            width: 5vh;
+            height: 5vh;
+            transform: translateY(30%);
+          }
+        }
+
+        ion-card-content {
+          ion-label {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 6px 0;
+            color: #6b8284;
+          }
+        }
+      }
+    }
+  }
+
+  .container_submain {
+    padding: 6px 20px;
+    color: #6b8284;
+
+    h5 {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    ion-item {
+      --background: #ffffff;
+      padding: 0;
+      margin: 14px 0;
+      --border-radius: 14px;
+      color: #ffffff;
+      font-weight: 600;
+
+      ion-label {
+        padding: 6px 0;
+        color: #6b8284;
+
+        h4 {
+          font-weight: 600;
+          font-size: 16px;
+        }
+      }
+    }
+
+    h2 {
+      padding-bottom: 8px;
+    }
+  }
+}

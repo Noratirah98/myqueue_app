@@ -1,0 +1,61 @@
+.scan-content {
+  --background: linear-gradient(135deg, #e3f2fd, #ffffff);
+}
+
+.scan-wrapper {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scan-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.scan-icon {
+  font-size: 72px;
+  color: var(--ion-color-primary);
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+p {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  margin-bottom: 24px;
+}
+
+ion-button {
+  height: 52px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.info-box {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+.info-box ion-icon {
+  font-size: 20px;
+  color: var(--ion-color-primary);
+}

@@ -1,0 +1,134 @@
+<ion-header [translucent]="true" class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button color="light" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <span>Scan QR Code</span>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="modern-content">
+
+  <!-- Scanner Active View -->
+  <div class="scanner-ui" *ngIf="scanActive">
+    <div class="scanner-overlay">
+      <div class="scan-area">
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+        <div class="scan-line"></div>
+        <div class="scan-glow"></div>
+      </div>
+    </div>
+
+    <div class="scanner-header">
+      <h2>Position QR Code</h2>
+      <p>Align the QR code within the frame</p>
+    </div>
+
+    <div class="scanner-instructions">
+      <div class="instruction-card">
+        <ion-icon name="camera-outline"></ion-icon>
+        <p>Scanning will happen automatically</p>
+      </div>
+    </div>
+
+    <div class="scanner-actions">
+      <ion-button color="light" expand="block" (click)="stopScan()" class="cancel-scan-btn">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Cancel Scan
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Default View (Not Scanning) -->
+  <div class="content-wrapper" *ngIf="!scanActive">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="icon-container">
+        <div class="icon-glow"></div>
+        <ion-icon name="qr-code"></ion-icon>
+      </div>
+      <h1>Scan QR Code</h1>
+      <p>Scan the QR code at the clinic counter to check in and get your queue number instantly.</p>
+    </div>
+
+    <!-- Clinic Info Card -->
+    <ion-card class="clinic-card">
+      <div class="card-header">
+        <ion-icon name="business-outline"></ion-icon>
+        <span>Appointment</span>
+      </div>
+      <ion-card-content>
+        <h3 class="clinic-name">{{ appointmentInfo.appointmentType }}</h3>
+        <div class="clinic-details">
+          <div class="detail-item">
+            <ion-icon name="calendar"></ion-icon>
+            <span>{{ appointmentInfo.date }}</span>
+          </div>
+          <div class="detail-item">
+            <ion-icon name="time"></ion-icon>
+            <span>{{ appointmentInfo.time }}</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Instructions -->
+    <div class="instructions-card">
+      <h3>
+        <ion-icon name="information-circle-outline"></ion-icon>
+        How It Works
+      </h3>
+      <ol>
+        <li>Tap the "Start Scanning" button below</li>
+        <li>Point your camera at the QR code at the counter</li>
+        <li>Wait for automatic detection</li>
+        <li>Receive your queue number instantly</li>
+      </ol>
+    </div>
+
+    <!-- Scan Button -->
+    <div class="action-section">
+      <ion-button expand="block" size="large" (click)="startScan()" [disabled]="hasPermission !== true"
+        class="scan-button">
+        <ion-icon slot="start" name="scan-outline"></ion-icon>
+        Start Scanning
+      </ion-button>
+    </div>
+
+    <!-- Permission Warning -->
+    <div class="permission-warning" *ngIf="hasPermission === false">
+      <div class="warning-content">
+        <ion-icon name="warning-outline"></ion-icon>
+        <div class="warning-text">
+          <h4>Camera Permission Required</h4>
+          <p>MyQueue needs camera access to scan QR codes. Please enable camera permission in your device settings.</p>
+        </div>
+      </div>
+      <ion-button size="small" fill="solid" color="warning" (click)="checkPermission()" class="permission-btn">
+        <ion-icon slot="start" name="lock-open-outline"></ion-icon>
+        Grant Permission
+      </ion-button>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section">
+      <div class="help-content">
+        <ion-icon name="help-circle-outline"></ion-icon>
+        <div class="help-text">
+          <h4>Need Help?</h4>
+          <p>If you're having trouble scanning the QR code, please visit the clinic counter for assistance.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>

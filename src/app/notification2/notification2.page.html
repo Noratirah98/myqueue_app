@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      Notifikasi
+      <ion-badge *ngIf="hasUnread" color="danger" class="unread-badge">
+        {{unreadCount}}
+      </ion-badge>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="markAllAsRead()" *ngIf="hasUnread">
+        <ion-icon slot="icon-only" name="checkmark-done-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="clearAll()" *ngIf="notifications.length > 0">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Filter Segment -->
+  <ion-toolbar>
+    <ion-segment [value]="selectedFilter" (ionChange)="filterChanged($event)">
+      <ion-segment-button value="all">
+        <ion-label>Semua</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="unread">
+        <ion-label>Belum Baca</ion-label>
+        <ion-badge *ngIf="unreadCount > 0">{{unreadCount}}</ion-badge>
+      </ion-segment-button>
+      <ion-segment-button value="queue">
+        <ion-label>Giliran</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="appointment">
+        <ion-label>Temujanji</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Memuatkan notifikasi...</p>
+  </div>
+
+  <!-- Content -->
+  <div class="content-wrapper" *ngIf="!loading">
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredNotifications.length === 0">
+      <ion-icon name="notifications-off-outline"></ion-icon>
+      <h3>Tiada Notifikasi</h3>
+      <p *ngIf="selectedFilter === 'all'">Anda tidak mempunyai sebarang notifikasi buat masa ini.</p>
+      <p *ngIf="selectedFilter === 'unread'">Semua notifikasi telah dibaca.</p>
+      <p *ngIf="selectedFilter === 'queue'">Tiada notifikasi giliran.</p>
+      <p *ngIf="selectedFilter === 'appointment'">Tiada notifikasi temujanji.</p>
+    </div>
+
+    <!-- Notification List -->
+    <ion-list *ngIf="filteredNotifications.length > 0">
+      <ion-item-sliding *ngFor="let notification of filteredNotifications">
+
+        <ion-item [class.unread]="!notification.read" (click)="onNotificationClick(notification)" button>
+          <div class="notification-icon" [style.background]="'var(--ion-color-' + notification.color + ')'"
+            slot="start">
+            <ion-icon [name]="notification.icon"></ion-icon>
+          </div>
+
+          <ion-label>
+            <h2>
+              {{notification.title}}
+              <ion-badge *ngIf="!notification.read" color="primary" class="new-badge">Baru</ion-badge>
+            </h2>
+            <p>{{notification.message}}</p>
+            <p class="timestamp">
+              <ion-icon name="time-outline"></ion-icon>
+              {{formatTimestamp(notification.timestamp)}}
+            </p>
+          </ion-label>
+
+          <ion-button fill="clear" slot="end" (click)="showNotificationOptions(notification, $event)">
+            <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+          </ion-button>
+        </ion-item>
+
+        <!-- Swipe Actions -->
+        <ion-item-options side="start">
+          <ion-item-option color="primary" (click)="markAsRead(notification.id)" *ngIf="!notification.read">
+            <ion-icon slot="icon-only" name="mail-open"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="warning" (click)="markAsUnread(notification.id)" *ngIf="notification.read">
+            <ion-icon slot="icon-only" name="mail-unread"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+
+        <ion-item-options side="end">
+          <ion-item-option color="danger" (click)="deleteNotification(notification.id)">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+
+      </ion-item-sliding>
+    </ion-list>
+
+  </div>
+
+</ion-content>

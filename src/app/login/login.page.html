@@ -1,0 +1,98 @@
+<ion-content [fullscreen]="true" class="auth-content">
+  <div class="auth-background">
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
+    <div class="bg-circle circle-3"></div>
+  </div>
+
+  <div class="auth-container">
+
+    <!-- Logo & Header -->
+    <div class="auth-header">
+      <div class="logo-wrapper">
+        <div class="logo">
+          <ion-icon name="medkit"></ion-icon>
+        </div>
+        <div class="logo-pulse"></div>
+      </div>
+      <h1 class="app-title">MyQueue</h1>
+      <p class="app-subtitle">Mobile Application for Clinic Queue and Appointment Tracking System</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+      <div class="card-header">
+        <h2>Welcome Back</h2>
+        <p>Login to continue</p>
+      </div>
+
+      <!-- Login Form -->
+      <form class="auth-form" (ngSubmit)="login()">
+
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <div class="input-icon" slot="start">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <ion-input [(ngModel)]="loginData.email" name="email" type="email" placeholder="Email Address"
+              autocomplete="username" class="custom-input">
+            </ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <div class="input-icon" slot="start">
+              <ion-icon name="lock-closed-outline"></ion-icon>
+            </div>
+            <ion-input [(ngModel)]="loginData.password" name="password" [type]="showPassword ? 'text' : 'password'"
+              placeholder="Password" autocomplete="current-password" class="custom-input">
+            </ion-input>
+            <ion-button fill="clear" slot="end" class="toggle-password" (click)="togglePasswordVisibility()">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </div>
+
+        <div class="form-options">
+          <div class="remember-me">
+            <ion-checkbox [(ngModel)]="rememberMe" name="rememberMe" class="custom-checkbox"></ion-checkbox>
+            <ion-label>Remember me</ion-label>
+          </div>
+        </div>
+
+        <ion-button expand="block" type="submit" class="login-button">
+          <span>Login</span>
+          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+        </ion-button>
+
+      </form>
+    </div>
+
+    <!-- Info Card -->
+    <div class="info-card">
+      <div class="info-icon">
+        <ion-icon name="information-circle-outline"></ion-icon>
+      </div>
+      <div class="info-content">
+        <h3>No Account?</h3>
+        <p>Your account will be registered by clinic staff during your first visit.</p>
+      </div>
+    </div>
+
+    <!-- Help Button -->
+    <div class="footer-section">
+      <ion-button fill="clear" class="help-button" (click)="showHelpInfo()">
+        <ion-icon slot="start" name="help-circle-outline"></ion-icon>
+        Help & FAQ
+      </ion-button>
+    </div>
+
+    <!-- Version Info -->
+    <div class="version-info">
+      <p>MyQueue v1.0.0</p>
+    </div>
+
+  </div>
+
+</ion-content>

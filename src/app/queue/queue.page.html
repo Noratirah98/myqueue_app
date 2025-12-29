@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Queue Status</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="queue-content">
+
+  <!-- STATE 1: Appointment exists, not checked in -->
+  <div *ngIf="todayAppointment && !hasCheckedIn" class="state-card">
+    <ion-icon name="calendar-outline"></ion-icon>
+    <h2>Today's Appointment</h2>
+
+    <p><strong>Type:</strong> {{ todayAppointment.appointmentType }}</p>
+    <p><strong>Time:</strong> {{ todayAppointment.time }}</p>
+
+    <ion-button expand="block" color="primary" (click)="checkIn()">
+      Scan QR / Check-in
+    </ion-button>
+  </div>
+
+  <!-- STATE 2: Waiting / Serving -->
+  <div *ngIf="hasCheckedIn" class="queue-card">
+
+    <h3>Your Queue Number</h3>
+    <div class="queue-number">{{ myQueueNumber }}</div>
+
+    <div class="divider"></div>
+
+    <div class="queue-info">
+      <div>
+        <span>Now Serving</span>
+        <strong>{{ currentServing }}</strong>
+      </div>
+
+      <div>
+        <span>People Ahead</span>
+        <strong>{{ peopleAhead }}</strong>
+      </div>
+    </div>
+
+    <ion-badge [color]="status === 'serving' ? 'success' : status === 'done' ? 'medium' : 'warning'">
+      {{ status | uppercase }}
+    </ion-badge>
+
+  </div>
+
+  <!-- STATE 3: No appointment -->
+  <div *ngIf="!todayAppointment" class="state-card empty">
+    <ion-icon name="information-circle-outline"></ion-icon>
+    <h2>No Appointment Today</h2>
+    <p>Please book an appointment first.</p>
+  </div>
+
+</ion-content>
