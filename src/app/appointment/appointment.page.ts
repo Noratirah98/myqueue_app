@@ -332,7 +332,7 @@ export class AppointmentPage implements OnInit {
 
       /* SAVE NEW APPOINTMENT */
       const appointmentData = {
-          uid: uid,
+          uid,
           patientName: patientName,
           appointmentType: this.selectedType?.name,
           date: selectedDate,
@@ -357,7 +357,7 @@ export class AppointmentPage implements OnInit {
   }
 
   async hasAppointmentOnDate(uid: string, date: string): Promise<boolean> {
-    const db      = getDatabase();
+    const db       = getDatabase();
     const snapshot = await get(ref(db, 'appointments'));
 
     if (!snapshot.exists()) return false;

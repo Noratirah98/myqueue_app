@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { get, getDatabase, ref, set, update } from 'firebase/database';
+import { equalTo, get, getDatabase, orderByChild, query, ref, set, update } from 'firebase/database';
 import { MainService } from '../services/main.service';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 
@@ -16,8 +16,9 @@ export class QrScanner3Page implements OnInit {
 
   constructor(
     private router: Router,
-    private main: MainService,
-    private auth: AuthService  ) {}
+    public main: MainService,
+    private auth: AuthService  
+  ) {}
 
   ngOnInit() {
     
@@ -64,14 +65,14 @@ export class QrScanner3Page implements OnInit {
     const uid = this.auth.getUID();
     if (!uid) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    const db = getDatabase();
-    const appointmentRef = ref(db, 'appointments');
+    const today          = new Date().toISOString().split('T')[0];
+    const db             = getDatabase();
+    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
 
     const snapshot = await get(appointmentRef);
 
     let appointment: any = null;
-    let appointmentId = '';
+    let appointmentId    = '';
 
     snapshot.forEach(child => {
       const data = child.val();
@@ -80,7 +81,7 @@ export class QrScanner3Page implements OnInit {
         data.date === today &&
         data.status === 'pending'
       ) {
-        appointment = data;
+        appointment   = data;
         appointmentId = child.key!;
       }
     });

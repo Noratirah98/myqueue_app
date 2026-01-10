@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { get, getDatabase, ref } from 'firebase/database';
+import { equalTo, get, getDatabase, orderByChild, query, ref } from 'firebase/database';
 import { MainService } from '../services/main.service';
 
 @Component({
@@ -15,7 +15,7 @@ export class ScanPage implements OnInit {
 
   constructor(
     private router: Router,
-    private main: MainService,
+    public main: MainService,
     private auth: AuthService,
   ) {}
 
@@ -31,25 +31,27 @@ export class ScanPage implements OnInit {
     if (!uid) return;
 
     const today = new Date().toISOString().split('T')[0];
-    const db = getDatabase();
 
-    const snapshot = await get(ref(db, 'appointments'));
+    const db             = getDatabase();
+    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const snapshot       = await get(appointmentRef);
 
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists()) {
+      this.hasValidAppointment = false;
+      this.todayAppointment = null;
+      return;
+    }
+
+    this.hasValidAppointment = false;
+    this.todayAppointment = null;
 
     snapshot.forEach(child => {
       const data = child.val();
 
-      if (
-        data.uid === uid &&
-        data.date === today &&
-        data.status === 'pending'
-      ) {
+      // ✅ now safe to filter locally
+      if (data.date === today && data.status === 'pending') {
         this.hasValidAppointment = true;
-        this.todayAppointment = {
-          id: child.key,
-          ...data
-        };
+        this.todayAppointment = { id: child.key, ...data };
       }
     });
   }

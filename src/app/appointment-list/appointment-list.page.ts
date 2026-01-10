@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActionSheetController, AlertController, LoadingController } from '@ionic/angular';
-import { getDatabase, ref, get, set } from "firebase/database";
+import { getDatabase, ref, get, set, query, orderByChild, equalTo } from "firebase/database";
 import { AuthService } from '../services/auth.service';
 import { MainService } from '../services/main.service';
 
-type AppointmentStatus = 'confirmed' | 'completed' | 'cancelled';
+type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 
 interface Appointment {
   id: string;
@@ -57,11 +57,11 @@ export class AppointmentListPage implements OnInit {
     this.loading = true;
 
     const uid = this.authService.getUID();
-    const db = getDatabase();
+    const db  = getDatabase();
 
     try {
-      const appointmentsRef = ref(db, 'appointments');
-      const snapshot = await get(appointmentsRef);
+      const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+      const snapshot       = await get(appointmentRef);
 
       this.appointments = [];
 
@@ -94,12 +94,12 @@ export class AppointmentListPage implements OnInit {
 
     this.upcomingAppointments = this.appointments.filter(apt => {
       const aptDate = new Date(apt.date);
-      return apt.status === 'confirmed' && aptDate >= today;
+      return apt.status === 'pending' && aptDate >= today;
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     this.pastAppointments = this.appointments.filter(apt => {
       const aptDate = new Date(apt.date);
-      return apt.status === 'completed' || (apt.status === 'confirmed' && aptDate < today);
+      return apt.status === 'completed' || (apt.status === 'pending' && aptDate < today);
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     this.cancelledAppointments = this.appointments.filter(
@@ -172,7 +172,7 @@ export class AppointmentListPage implements OnInit {
 
   getStatusColor(status: AppointmentStatus): string {
     switch (status) {
-      case 'confirmed': return 'primary';
+      case 'pending': return 'primary';
       case 'completed': return 'success';
       case 'cancelled': return 'danger';
       default: return 'medium';
@@ -181,7 +181,7 @@ export class AppointmentListPage implements OnInit {
 
   getStatusText(status: AppointmentStatus): string {
     switch (status) {
-      case 'confirmed': return 'Confirmed';
+      case 'pending': return 'Confirmed';
       case 'completed': return 'Completed';
       case 'cancelled': return 'Cancelled';
       default: return status;
@@ -239,7 +239,7 @@ export class AppointmentListPage implements OnInit {
     ];
 
     // Only allow cancel for upcoming confirmed appointments
-    if (appt.status === 'confirmed' && this.getDaysUntil(appt.date) >= 0) {
+    if (appt.status === 'pending' && this.getDaysUntil(appt.date) >= 0) {
       buttons.push({
         text: 'Cancel Appointment',
         icon: 'close-circle-outline',

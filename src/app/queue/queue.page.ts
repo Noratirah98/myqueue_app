@@ -20,8 +20,8 @@ export class QueuePage implements OnInit {
   status: 'waiting' | 'serving' | 'done' = 'waiting';
 
   constructor(
+    public main: MainService,
     private auth: AuthService,
-    private main: MainService
   ) {}
 
   ngOnInit() {
@@ -35,16 +35,11 @@ export class QueuePage implements OnInit {
     const uid = this.auth.getUID();
     if (!uid) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    const db    = getDatabase();
+    const today          = new Date().toISOString().split('T')[0];
+    const db             = getDatabase();
+    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
 
-    const q = query(
-      ref(db, 'appointments'),
-      orderByChild('uid'),
-      equalTo(uid)
-    );
-
-    onValue(q, snapshot => {
+    onValue(appointmentRef, snapshot => {
       this.todayAppointment = null;
 
       snapshot.forEach(child => {

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { getAuth, signOut } from 'firebase/auth';
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "firebase/database";
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -57,8 +57,8 @@ export class HomePage implements OnInit {
       return;
     }
 
-    const db = getDatabase();
-    const appointmentRef = ref(db, `appointments`);
+    const db             = getDatabase();
+    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
 
     onValue(appointmentRef, snapshot => {
       if (!snapshot.exists()) {
@@ -118,7 +118,15 @@ export class HomePage implements OnInit {
     this.router.navigate(['/appointment-list']);
   }
 
-  scanQRCode() {
+  scanQRCode1() {
+    this.router.navigate(['/qr-scanner3']);
+  }
+
+  scanQRCode2() {
+    this.router.navigate(['/queue']);
+  }
+
+  scanQRCode3() {
     this.router.navigate(['/scan']);
   }
 
