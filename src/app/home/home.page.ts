@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { getAuth, signOut } from 'firebase/auth';
-import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "firebase/database";
+import { getDatabase, ref, onValue, query, orderByChild, equalTo, get } from "firebase/database";
 import { AuthService } from '../services/auth.service';
+import { StorageService } from '../services/storage.service';
 
 @Component({
   selector: 'app-home',
@@ -27,7 +28,8 @@ export class HomePage implements OnInit {
 
   constructor(
     private router: Router,
-    private auth: AuthService
+    private auth: AuthService,
+    private storage: StorageService,
   ) {}
 
   ngOnInit() {
@@ -36,17 +38,33 @@ export class HomePage implements OnInit {
     this.loadQueueStatus(); // future-ready
   }
 
-  /* LOAD USER PROFILE */
-  loadUserProfile() {
-    const uid = this.auth.getUID();
-    const db = getDatabase();
+  async loadUserProfile() {
+    // Prefer Firebase Auth current user first (refresh-safe)
+    const authUser = getAuth().currentUser;
+    const uid = authUser?.uid || this.auth.getUID();
 
-    onValue(ref(db, `patients/${uid}`), snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        this.userName = data.name || 'Patient';
-      }
-    });
+    if (!uid) {
+      this.userName = 'Patient';
+      return;
+    }
+
+    const cachedName = await this.storage.get<string>('patientName');
+    if (cachedName) {
+      this.userName = cachedName;
+      return;
+    }
+
+    try {
+      const db      = getDatabase();
+      const snap    = await get(ref(db, `patients/${uid}`));
+      const name    = snap.exists() ? (snap.val()?.name || 'Patient') : 'Patient';
+      this.userName = name;
+
+      await this.storage.set('patientName', name);
+    } catch (e) {
+      console.error('Failed to load patient profile:', e);
+      this.userName = 'Patient';
+    }
   }
 
   /* LOAD NEAREST APPOINTMENT */
@@ -138,14 +156,20 @@ export class HomePage implements OnInit {
     // optional
   }
 
-  logout() {
+  async logout() {
     const auth = getAuth();
 
-    signOut(auth).then(() => {
-      this.router.navigateByUrl('/login');
-    }).catch(err => {
-      console.log(err);
-    });
+    try {
+      await signOut(auth);
+
+      // Clear local cached data
+      await this.storage.clear(); 
+      await this.storage.remove('patientName');
+
+      this.router.navigateByUrl('/login', { replaceUrl: true });
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
   }
 
   /* HELPERS */
@@ -158,24 +182,6 @@ export class HomePage implements OnInit {
       year: 'numeric'
     });
   }
-
-  // getStatusText(status: string) {
-  //   switch (status) {
-  //     case 'pending': return 'Pending';
-  //     case 'confirmed': return 'Confirmed';
-  //     case 'completed': return 'Completed';
-  //     default: return status;
-  //   }
-  // }
-
-  // getStatusColor(status: string) {
-  //   switch (status) {
-  //     case 'pending': return 'warning';
-  //     case 'confirmed': return 'primary';
-  //     case 'completed': return 'success';
-  //     default: return 'medium';
-  //   }
-  // }
 
   /* QUEUE UI HELPERS */
   getQueueStatusText() {

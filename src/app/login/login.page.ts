@@ -3,6 +3,8 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { Router } from '@angular/router';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
+import { get, getDatabase, ref } from 'firebase/database';
+import { StorageService } from '../services/storage.service';
 
 
 @Component({
@@ -22,6 +24,7 @@ export class LoginPage implements OnInit {
   constructor(
     private router: Router,
     private main: MainService,
+    private storage: StorageService,
     private alertController: AlertController,
     private loadingController: LoadingController,
   ) {}
@@ -29,7 +32,6 @@ export class LoginPage implements OnInit {
   ngOnInit() {}
 
   async login() {
-    // Validate input
     if (!this.loginData.email || !this.loginData.password) {
       await this.main.showToast('Please enter email and password', 'danger');
       return;
@@ -40,47 +42,69 @@ export class LoginPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Logging in...'
-    });
-
+    const loading = await this.loadingController.create({ message: 'Logging in...' });
     await loading.present();
 
     try {
       const auth = getAuth();
 
+      const email = this.loginData.email.trim();
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        this.loginData.email,
+        email,
         this.loginData.password
       );
 
-      const user = userCredential.user;
+      const uid = userCredential.user.uid;
 
-      // Optional: remember login
-      if (this.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
+      // Save uid first (so you still can proceed even if patient profile blocked)
+      await this.storage.set('uid', uid);
+
+      console.log("UID: ", uid);
+
+      // Try load patient profile (DON'T fail login if denied)
+      try {
+        const db          = getDatabase();
+        const patientSnap = await get(ref(db, `patients/${uid}`));
+        const patient     = patientSnap.exists() ? patientSnap.val() : null;
+        const patientName = patient?.name ?? 'Patient';
+
+        console.log ("Patient Data: ", patient);
+        console.log ("Patient Name: ", patientName);
+
+        await this.storage.set('patientName', patientName);
+      } catch (error: any) {
+        console.log("LOGIN ERROR FULL:", error);
+        console.log("CODE:", error?.code);
+        console.log("MESSAGE:", error?.message);
+        await loading.dismiss();
+        this.handleFirebaseLoginError(error);
       }
 
-      localStorage.setItem('uid', user.uid);
+      if (this.rememberMe) localStorage.setItem('rememberMe', 'true');
 
       await loading.dismiss();
       await this.main.showToast('Login successfully', 'success', 'checkmark-done-circle');
 
-      this.router.navigate(['/home']);
-
-    } catch (error: any) {
+      this.router.navigateByUrl('/home');
+    } catch (authErr: any) {
       await loading.dismiss();
-      this.handleFirebaseLoginError(error);
+      console.log('AUTH ERROR:', authErr);
+      this.handleFirebaseLoginError(authErr);
     }
   }
 
   handleFirebaseLoginError(error: any) {
     let message = 'Login failed. Please try again.';
 
-    switch (error.code) {
+    switch (error?.code) {
+      case 'auth/invalid-credential':
+        message = 'Incorrect email or password.';
+        break;
+
       case 'auth/user-not-found':
-        message = 'Email not found. Please contact the clinic counter.';
+        message = 'Email not found. Please register at the clinic counter.';
         break;
 
       case 'auth/wrong-password':
@@ -92,11 +116,15 @@ export class LoginPage implements OnInit {
         break;
 
       case 'auth/user-disabled':
-        message = 'Account has been disabled. Please contact the clinic.';
+        message = 'Account disabled. Please contact the clinic.';
         break;
 
       case 'auth/too-many-requests':
-        message = 'Too many attempts. Please try again later.';
+        message = 'Too many attempts. Try again later.';
+        break;
+
+      case 'auth/operation-not-allowed':
+        message = 'Email/Password sign-in is disabled in Firebase.';
         break;
     }
 

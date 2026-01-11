@@ -30,6 +30,7 @@
     "@capacitor/keyboard": "5.0.8",
     "@capacitor/status-bar": "5.0.7",
     "@ionic/angular": "^7.7.3",
+    "@ionic/storage-angular": "^4.0.0",
     "firebase": "^12.6.0",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
