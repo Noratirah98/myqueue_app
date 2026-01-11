@@ -162,11 +162,12 @@ export class HomePage implements OnInit {
     try {
       await signOut(auth);
 
-      // Clear local cached data
-      await this.storage.clear(); 
-      await this.storage.remove('patientName');
+      // Clear all cached user data (uid, patientName, etc.)
+      await this.storage.clear();
 
+      // Redirect to login & block back navigation
       this.router.navigateByUrl('/login', { replaceUrl: true });
+
     } catch (err) {
       console.error('Logout failed', err);
     }
