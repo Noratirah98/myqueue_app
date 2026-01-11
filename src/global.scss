@@ -30,3 +30,9 @@ body.dark {
   --ion-text-color: #ffffff;
   // ... other dark mode variables
 }
+
+.login-help-alert .alert-message {
+  white-space: pre-line;   /* IMPORTANT: show \n line breaks */
+  text-align: left;
+  line-height: 1.6;
+}

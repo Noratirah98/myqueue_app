@@ -143,18 +143,16 @@ export class LoginPage implements OnInit {
   async showHelpInfo() {
     const alert = await this.alertController.create({
       header: 'Login Help',
-      message: `
-        <div style="text-align: left; line-height: 1.6;">
-          <p><strong>No Account?</strong></p>
-          <p>Your account will be created by clinic staff during your first visit.</p>
-          <br>
-          <p><strong>Forgot Password?</strong></p>
-          <p>Please contact the clinic counter to reset your password.</p>
-          <br>
-          <p><strong>Login Issues?</strong></p>
-          <p>Make sure your email is in valid format</p>
-        </div>
-      `,
+      cssClass: 'login-help-alert',
+      message:
+          `No Account?
+          Your account will be created by clinic staff during your first visit.
+
+          Forgot Password?
+          Please use the email password reset feature.
+
+          Login Issues?
+          Make sure your email format is correct.`,
       buttons: ['Close']
     });
 
