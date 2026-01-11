@@ -43,7 +43,7 @@ export class AppointmentListPage implements OnInit {
   constructor(
     private router: Router,
     private main: MainService,
-    private authService: AuthService,
+    private auth: AuthService,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private actionSheetController: ActionSheetController,
@@ -56,7 +56,7 @@ export class AppointmentListPage implements OnInit {
   async loadAppointments() {
     this.loading = true;
 
-    const uid = this.authService.getUID();
+    const uid = this.auth.getUID();
     const db  = getDatabase();
 
     try {

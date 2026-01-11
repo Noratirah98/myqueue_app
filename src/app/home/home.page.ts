@@ -41,7 +41,7 @@ export class HomePage implements OnInit {
   async loadUserProfile() {
     // Prefer Firebase Auth current user first (refresh-safe)
     const authUser = getAuth().currentUser;
-    const uid = authUser?.uid || this.auth.getUID();
+    const uid      = authUser?.uid || this.auth.getUID();
 
     if (!uid) {
       this.userName = 'Patient';
