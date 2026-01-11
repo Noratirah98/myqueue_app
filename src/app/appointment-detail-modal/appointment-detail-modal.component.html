@@ -1,0 +1,123 @@
+<!-- <ion-header>
+  <ion-toolbar>
+    <ion-title>Appointment Details</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="detail-content">
+    <div class="detail-item">
+      <strong>Appointment Type</strong>
+      <p>{{ appointment.appointmentType }}</p>
+    </div>
+
+    <div class="detail-item">
+      <strong>Date & Time</strong>
+      <p>{{ formatFullDate(appointment.date) }}</p>
+      <p class="sub">{{ appointment.time }}</p>
+    </div>
+
+    <div class="detail-item" *ngIf="appointment.symptoms">
+      <strong>Symptoms</strong>
+      <p>{{ appointment.symptoms }}</p>
+    </div>
+
+    <div class="detail-item" *ngIf="appointment.notes">
+      <strong>Notes</strong>
+      <p>{{ appointment.notes }}</p>
+    </div>
+
+    <div class="detail-item">
+      <strong>Status</strong>
+      <p>{{ getStatusText(appointment.status) }}</p>
+    </div>
+  </div>
+</ion-content> -->
+
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Appointment Details</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="modal-content">
+
+    <!-- Status Badge -->
+    <div class="status-badge" [attr.data-status]="appt.status">
+      <ion-icon [name]="getStatusIcon(appt.status)"></ion-icon>
+      <span>{{ getStatusText(appt.status) }}</span>
+    </div>
+
+    <!-- Appointment Type Card -->
+    <div class="info-card primary-card">
+      <div class="card-icon">
+        <ion-icon name="medical"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Appointment Type</span>
+        <h2>{{ appt.appointmentType }}</h2>
+      </div>
+    </div>
+
+    <!-- Date & Time Card -->
+    <div class="info-card">
+      <div class="card-icon">
+        <ion-icon name="calendar"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Date & Time</span>
+        <p class="main-text">{{ formatFullDate(appt.date) }}</p>
+        <p class="sub-text">
+          <ion-icon name="time-outline"></ion-icon>
+          {{ appt.time }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Symptoms Card -->
+    <div class="info-card" *ngIf="appt.symptoms">
+      <div class="card-icon">
+        <ion-icon name="fitness"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Symptoms</span>
+        <p class="main-text">{{ appt.symptoms }}</p>
+      </div>
+    </div>
+
+    <!-- Notes Card -->
+    <div class="info-card" *ngIf="appt.notes">
+      <div class="card-icon">
+        <ion-icon name="document-text"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Additional Notes</span>
+        <p class="main-text">{{ appt.notes }}</p>
+      </div>
+    </div>
+
+    <!-- Created Date (if available) -->
+    <div class="created-info" *ngIf="appt.createdAt">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>Booked on {{ formatCreatedDate(appt.createdAt) }}</span>
+    </div>
+
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="dismiss()" class="close-button">
+      Close
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

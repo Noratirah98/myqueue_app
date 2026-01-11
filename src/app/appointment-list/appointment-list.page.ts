@@ -1,13 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ActionSheetController, AlertController, LoadingController } from '@ionic/angular';
+import { ActionSheetController, AlertController, LoadingController, ModalController } from '@ionic/angular';
 import { getDatabase, ref, get, set, query, orderByChild, equalTo } from "firebase/database";
 import { AuthService } from '../services/auth.service';
 import { MainService } from '../services/main.service';
+import { AppointmentDetailModalComponent } from '../appointment-detail-modal/appointment-detail-modal.component';
 
-type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
+// type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 
-interface Appointment {
+export type AppointmentStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled';
+
+
+export interface Appointment {
   id: string;
   uid: string;
   appointmentType: string; 
@@ -24,6 +32,7 @@ interface Appointment {
   templateUrl: './appointment-list.page.html',
   styleUrls: ['./appointment-list.page.scss'],
 })
+
 export class AppointmentListPage implements OnInit {
   // Segment State
   selectedSegment: 'upcoming' | 'past' | 'cancelled' = 'upcoming';
@@ -44,6 +53,7 @@ export class AppointmentListPage implements OnInit {
     private router: Router,
     private main: MainService,
     private auth: AuthService,
+    private modalController:ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private actionSheetController: ActionSheetController,
@@ -179,6 +189,15 @@ export class AppointmentListPage implements OnInit {
     }
   }
 
+  // getStatusText(status: AppointmentStatus): string {
+  //   switch (status) {
+  //     case 'pending': return 'Confirmed';
+  //     case 'completed': return 'Completed';
+  //     case 'cancelled': return 'Cancelled';
+  //     default: return status;
+  //   }
+  // }
+
   getStatusText(status: AppointmentStatus): string {
     switch (status) {
       case 'pending': return 'Confirmed';
@@ -188,45 +207,17 @@ export class AppointmentListPage implements OnInit {
     }
   }
 
-  // -------- Actions --------
-
   async viewAppointmentDetails(appt: Appointment) {
-    const alert = await this.alertController.create({
-      header: 'Appointment Details',
-      cssClass: 'appointment-detail-alert',
-      message: `
-        <div class="detail-content">
-          <div class="detail-item">
-            <strong>Appointment Type</strong>
-            <p>${appt.appointmentType}</p>
-          </div>
-          <div class="detail-item">
-            <strong>Date & Time</strong>
-            <p>${this.formatFullDate(appt.date)}</p>
-            <p class="sub">${appt.time}</p>
-          </div>
-          ${appt.symptoms ? `
-            <div class="detail-item">
-              <strong>Symptoms</strong>
-              <p>${appt.symptoms}</p>
-            </div>
-          ` : ''}
-          ${appt.notes ? `
-            <div class="detail-item">
-              <strong>Notes</strong>
-              <p>${appt.notes}</p>
-            </div>
-          ` : ''}
-          <div class="detail-item">
-            <strong>Status</strong>
-            <p>${this.getStatusText(appt.status)}</p>
-          </div>
-        </div>
-      `,
-      buttons: ['Close']
+    const modal = await this.modalController.create({
+      component: AppointmentDetailModalComponent,
+      componentProps: {
+        appt,
+        formatFullDate: (d: string) => this.formatFullDate(d),
+        getStatusText: (s: AppointmentStatus) => this.getStatusText(s),
+      }
     });
 
-    await alert.present();
+    await modal.present();
   }
 
   async showAppointmentOptions(appt: Appointment) {
