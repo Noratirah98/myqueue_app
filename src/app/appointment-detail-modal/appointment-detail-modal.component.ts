@@ -23,34 +23,6 @@ type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 })
 
 export class AppointmentDetailModalComponent {
-//   @Input() appointment!: Appointment; 
-
-//   constructor(
-//     private modalController: ModalController
-//   ) {}
-
-//   dismiss() {
-//     this.modalController.dismiss();
-//   }
-
-//   formatFullDate(date: string) {
-//     return new Date(date).toLocaleDateString('en-US', { 
-//       weekday: 'long', 
-//       year: 'numeric', 
-//       month: 'long', 
-//       day: 'numeric' 
-//     });
-//   }
-
-//   getStatusText(status: AppointmentStatus): string {
-//     const statusMap = {
-//       'pending': 'Pending',
-//       'completed': 'Completed',
-//       'cancelled': 'Cancelled'
-//     };
-//     return statusMap[status] || status;
-//   }
-
   @Input() appt!: any;
   @Input() formatFullDate!: (date: string) => string;
   @Input() getStatusText!: (status: string) => string;
