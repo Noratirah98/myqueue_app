@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { MainService } from '../services/main.service';
 
 @Component({
   selector: 'app-qr-scanner2',
@@ -23,6 +24,7 @@ export class QrScanner2Page implements OnInit, OnDestroy {
   };
 
   constructor(
+    public main: MainService,
     private router: Router,
     private alertController: AlertController,
     private loadingController: LoadingController,

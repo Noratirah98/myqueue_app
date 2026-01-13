@@ -55,14 +55,14 @@
   </ion-refresher>
 
   <!-- Loading State -->
-  <div class="loading-container" *ngIf="loading">
+  <!-- <div class="loading-container" *ngIf="loading">
     <div class="spinner-wrapper">
       <ion-spinner name="crescent" color="primary"></ion-spinner>
     </div>
     <p>Loading appointments...</p>
-  </div>
+  </div> -->
 
-  <div class="content-wrapper" *ngIf="!loading">
+  <div class="content-wrapper">
 
     <!-- UPCOMING APPOINTMENTS -->
     <div *ngIf="selectedSegment === 'upcoming'" class="appointments-section">

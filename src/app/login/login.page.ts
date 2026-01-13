@@ -61,19 +61,15 @@ export class LoginPage implements OnInit {
       // Save uid first (so you still can proceed even if patient profile blocked)
       await this.storage.set('uid', uid);
 
-      console.log("UID: ", uid);
-
-      // Try load patient profile (DON'T fail login if denied)
+      // Try load patient profile
       try {
         const db          = getDatabase();
         const patientSnap = await get(ref(db, `patients/${uid}`));
         const patient     = patientSnap.exists() ? patientSnap.val() : null;
-        const patientName = patient?.name ?? 'Patient';
-
-        console.log ("Patient Data: ", patient);
-        console.log ("Patient Name: ", patientName);
+        const patientName = patient?.username ?? 'Patient';
 
         await this.storage.set('patientName', patientName);
+
       } catch (error: any) {
         console.log("LOGIN ERROR FULL:", error);
         console.log("CODE:", error?.code);

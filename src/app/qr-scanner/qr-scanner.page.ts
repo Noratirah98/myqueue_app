@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { get, getDatabase, ref, set } from 'firebase/database';
+import { MainService } from '../services/main.service';
 
 @Component({
   selector: 'app-qr-scanner',
@@ -13,6 +14,7 @@ export class QrScannerPage implements OnInit {
   scanning: boolean = false;
 
   constructor(
+    public main: MainService,
     private auth: AuthService
   ) {}
 

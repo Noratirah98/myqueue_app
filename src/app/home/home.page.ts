@@ -12,6 +12,7 @@ import { StorageService } from '../services/storage.service';
 })
 export class HomePage implements OnInit {
   userName: string = 'Patient';
+  userId: any;
   unreadNotifications = 0;
 
   // Nearest appointment only
@@ -32,16 +33,25 @@ export class HomePage implements OnInit {
     private storage: StorageService,
   ) {}
 
-  ngOnInit() {
+  handleRefresh(event: any) {
+    setTimeout(() => {
+      // Any calls to load data go here
+      event.target.complete();
+      this.ionViewWillEnter();
+    }, 2000);
+  }
+
+  ngOnInit() {}
+
+  async ionViewWillEnter() {
     this.loadUserProfile();
     this.loadNearestAppointment();
     this.loadQueueStatus(); // future-ready
   }
 
   async loadUserProfile() {
-    // Prefer Firebase Auth current user first (refresh-safe)
     const authUser = getAuth().currentUser;
-    const uid      = authUser?.uid || this.auth.getUID();
+    const uid = authUser?.uid || this.auth.getUID();
 
     if (!uid) {
       this.userName = 'Patient';
@@ -49,21 +59,23 @@ export class HomePage implements OnInit {
     }
 
     const cachedName = await this.storage.get<string>('patientName');
+
     if (cachedName) {
       this.userName = cachedName;
-      return;
-    }
+    } else {
+      try {
+        const db          = getDatabase();
+        const patientSnap = await get(ref(db, `patients/${uid}`));
+        const patient     = patientSnap.exists() ? patientSnap.val() : null;
+        const patientName = patient?.username ?? 'Patient';
 
-    try {
-      const db      = getDatabase();
-      const snap    = await get(ref(db, `patients/${uid}`));
-      const name    = snap.exists() ? (snap.val()?.name || 'Patient') : 'Patient';
-      this.userName = name;
+        this.userName = patientName;
 
-      await this.storage.set('patientName', name);
-    } catch (e) {
-      console.error('Failed to load patient profile:', e);
-      this.userName = 'Patient';
+        await this.storage.set('patientName', patientName);
+      } catch (e) {
+        console.error('Failed to load patient profile:', e);
+        this.userName = 'Patient';
+      }
     }
   }
 
@@ -148,6 +160,14 @@ export class HomePage implements OnInit {
     this.router.navigate(['/scan']);
   }
 
+  scanQRCode4() {
+    this.router.navigate(['/qr-scanner']);
+  }
+
+  scanQRCode5() {
+    this.router.navigate(['/qr-scanner2']);
+  }
+
   refreshQueue() {
     this.loadQueueStatus();
   }
@@ -160,14 +180,14 @@ export class HomePage implements OnInit {
     const auth = getAuth();
 
     try {
-      await signOut(auth);
-
-      // Clear all cached user data (uid, patientName, etc.)
-      await this.storage.clear();
+      // await signOut(auth);
+      const uid = getAuth().currentUser?.uid;
+      await this.storage.remove('patientName');
+      await this.storage.remove('uid');
+      await signOut(getAuth());
 
       // Redirect to login & block back navigation
       this.router.navigateByUrl('/login', { replaceUrl: true });
-
     } catch (err) {
       console.error('Logout failed', err);
     }

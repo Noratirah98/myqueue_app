@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { get, getDatabase, onValue, push, ref, set } from 'firebase/database';
+import { equalTo, get, getDatabase, onValue, orderByChild, push, query, ref, set } from 'firebase/database';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
@@ -295,7 +295,6 @@ export class AppointmentPage implements OnInit {
   /* ================= STEP 4: CONFIRMATION ================= */
   async confirmAppointment() {
     if (this.isLoading) return;
-    
     this.isLoading = true;
 
     try {
@@ -305,10 +304,24 @@ export class AppointmentPage implements OnInit {
         await this.main.showToast('User not logged in', 'danger');
         return;
       }
-      
-      const selectedDate  = this.appointmentForm.value.date; 
 
-      /* CHECK EXISTING APPOINTMENT */
+      const selectedDate = this.appointmentForm.value.date as string | null;
+      if (!selectedDate) {
+        await this.main.showToast('Please select a date', 'danger');
+        return;
+      }
+
+      if (!this.selectedType?.name) {
+        await this.main.showToast('Please select appointment type', 'danger');
+        return;
+      }
+
+      if (!this.selectedSlot?.display) {
+        await this.main.showToast('Please select a time slot', 'danger');
+        return;
+      }
+
+      // Check existing appointment
       const alreadyExists = await this.hasAppointmentOnDate(uid, selectedDate);
 
       if (alreadyExists) {
@@ -320,34 +333,30 @@ export class AppointmentPage implements OnInit {
         );
         return;
       }
-      
-      const db          = getDatabase();
-      const patientSnap = await get(ref(db, `patients/${uid}`)); // Get patient name
+
+      const db = getDatabase();
+      const patientSnap = await get(ref(db, `patients/${uid}`));
 
       if (!patientSnap.exists()) {
         throw new Error('Patient profile not found');
       }
 
-      const patientName = patientSnap.val().name;
+      const patientName = patientSnap.val()?.name ?? 'Patient';
 
-      /* SAVE NEW APPOINTMENT */
       const appointmentData = {
-          uid,
-          patientName: patientName,
-          appointmentType: this.selectedType?.name,
-          date: selectedDate,
-          time: this.selectedSlot?.display,
-          symptoms: this.appointmentForm.value.symptoms || '',
-          notes: this.appointmentForm.value.notes || '',
-          status: 'pending',
-          createdAt: new Date().toISOString()
+        uid,
+        patientName,
+        appointmentType: this.selectedType.name,
+        date: selectedDate,
+        time: this.selectedSlot.display,
+        symptoms: this.appointmentForm.value.symptoms || '',
+        notes: this.appointmentForm.value.notes || '',
+        status: 'pending' as const,
+        createdAt: new Date().toISOString()
       };
 
       await push(ref(db, `appointments`), appointmentData);
-
-      // Show success alert
       await this.showSuccessAlert();
-
     } catch (error) {
       console.error('Error booking appointment:', error);
       await this.showErrorAlert();
@@ -358,7 +367,8 @@ export class AppointmentPage implements OnInit {
 
   async hasAppointmentOnDate(uid: string, date: string): Promise<boolean> {
     const db       = getDatabase();
-    const snapshot = await get(ref(db, 'appointments'));
+    const q        = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const snapshot = await get(q);
 
     if (!snapshot.exists()) return false;
 
@@ -368,7 +378,6 @@ export class AppointmentPage implements OnInit {
       const data = child.val();
 
       if (
-        data.uid === uid &&
         data.date === date &&
         data.status !== 'cancelled'
       ) {
@@ -382,23 +391,14 @@ export class AppointmentPage implements OnInit {
   async showSuccessAlert() {
     const alert = await this.alertController.create({
       header: '✅ Success!',
-      message: `
-        <div style="text-align: left; padding: 10px 0;">
-          <p><strong>Your appointment has been successfully booked.</strong></p>
-          <br>
-          <p>📅 <strong>Date:</strong> ${this.displayDate}</p>
-          <p>⏰ <strong>Time:</strong> ${this.selectedSlot?.display}</p>
-          <p>🏥 <strong>Type:</strong> ${this.selectedType?.name}</p>
-          <br>
-          <p style="font-size: 13px; color: #666;">You will receive a reminder notification 1 day before your appointment.</p>
-        </div>
-      `,
+      message: 'Your appointment has been successfully booked.You will receive a reminder notification 1 day before your appointment.',
       buttons: [
         {
           text: 'OK',
           role: 'confirm',
           handler: () => {
-            this.router.navigate(['/appointment-list']);
+            this.showConfirm = false;
+            this.navCtrl.navigateBack('/appointment-list');
           }
         }
       ],

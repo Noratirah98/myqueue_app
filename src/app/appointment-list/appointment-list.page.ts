@@ -59,12 +59,27 @@ export class AppointmentListPage implements OnInit {
     private actionSheetController: ActionSheetController,
   ) {}
 
-  async ngOnInit() {
+  handleRefresh(event: any) {
+    setTimeout(() => {
+      // Any calls to load data go here
+      event.target.complete();
+      this.ionViewWillEnter();
+    }, 2000);
+  }
+
+  ngOnInit() {}
+
+  async ionViewWillEnter() {
     await this.loadAppointments();
   }
 
   async loadAppointments() {
-    this.loading = true;
+     const loading = await this.loadingController.create({
+      message: 'Loading...',
+      spinner: 'lines',
+    });
+
+    await loading.present();
 
     const uid = this.auth.getUID();
     const db  = getDatabase();
@@ -93,9 +108,9 @@ export class AppointmentListPage implements OnInit {
     } catch (error) {
       console.error(error);
       await this.main.showToast('Failed to load appointments', 'danger');
+    } finally {
+      await loading.dismiss();
     }
-
-    this.loading = false;
   }
 
   filterAppointments() {
@@ -188,15 +203,6 @@ export class AppointmentListPage implements OnInit {
       default: return 'medium';
     }
   }
-
-  // getStatusText(status: AppointmentStatus): string {
-  //   switch (status) {
-  //     case 'pending': return 'Confirmed';
-  //     case 'completed': return 'Completed';
-  //     case 'cancelled': return 'Cancelled';
-  //     default: return status;
-  //   }
-  // }
 
   getStatusText(status: AppointmentStatus): string {
     switch (status) {

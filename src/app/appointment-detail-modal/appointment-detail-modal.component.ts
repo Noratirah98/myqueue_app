@@ -1,20 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 
-// type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
-
-// interface Appointment {
-//   id: string;
-//   uid: string;
-//   appointmentType: string; 
-//   date: string;            
-//   time: string;          
-//   status: AppointmentStatus;
-//   createdAt?: string;
-//   symptoms?: string;
-//   notes?: string;
-// }
 
 @Component({
   selector: 'app-appointment-detail-modal',
@@ -37,7 +24,7 @@ export class AppointmentDetailModalComponent {
     this.modalController.dismiss();
   }
 
-   formatCreatedDate(date: string): string {
+  formatCreatedDate(date: string): string {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
