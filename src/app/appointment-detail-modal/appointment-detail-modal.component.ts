@@ -34,7 +34,7 @@ export class AppointmentDetailModalComponent {
 
   getStatusIcon(status: AppointmentStatus): string {
     const iconMap = {
-      'pending': 'hourglass-outline',
+      'pending'  : 'hourglass-outline',
       'completed': 'checkmark-circle',
       'cancelled': 'close-circle'
     };

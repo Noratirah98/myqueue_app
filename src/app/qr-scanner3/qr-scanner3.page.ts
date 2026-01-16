@@ -27,35 +27,35 @@ export class QrScanner3Page implements OnInit {
   /* START SCAN */
   async scanQR() {
     // Request permission
-    const permission = await BarcodeScanner.checkPermission({ force: true });
+    // const permission = await BarcodeScanner.checkPermission({ force: true });
 
-    if (!permission.granted) {
-      await this.main.showToast(
-        'Camera permission is required',
-        'danger',
-        'alert-circle-outline'
-      );
-      return;
-    }
+    // if (!permission.granted) {
+    //   await this.main.showToast(
+    //     'Camera permission is required',
+    //     'danger',
+    //     'alert-circle-outline'
+    //   );
+    //   return;
+    // }
 
-    // Hide background
-    BarcodeScanner.hideBackground();
+    // // Hide background
+    // BarcodeScanner.hideBackground();
 
-    const result = await BarcodeScanner.startScan();
+    // const result = await BarcodeScanner.startScan();
 
-    // Stop scan
-    BarcodeScanner.showBackground();
-    BarcodeScanner.stopScan();
+    // // Stop scan
+    // BarcodeScanner.showBackground();
+    // BarcodeScanner.stopScan();
 
-    if (!result.hasContent) {
-      await this.main.showToast('Scan cancelled', 'warning', 'close-circle-outline');
-      return;
-    }
+    // if (!result.hasContent) {
+    //   await this.main.showToast('Scan cancelled', 'warning', 'close-circle-outline');
+    //   return;
+    // }
 
-    if (result.content !== 'MYQUEUE_REGISTRATION') {
-      await this.main.showToast('Invalid QR Code', 'danger', 'alert-circle-outline');
-      return;
-    }
+    // if (result.content !== 'MYQUEUE_REGISTRATION') {
+    //   await this.main.showToast('Invalid QR Code', 'danger', 'alert-circle-outline');
+    //   return;
+    // }
 
     await this.processCheckIn();
   }

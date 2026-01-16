@@ -1,3 +1,5 @@
+<!-- login.page.html - With Forgot Password -->
+
 <ion-content [fullscreen]="true" class="auth-content">
   <div class="auth-background">
     <div class="bg-circle circle-1"></div>
@@ -59,6 +61,9 @@
             <ion-checkbox [(ngModel)]="rememberMe" name="rememberMe" class="custom-checkbox"></ion-checkbox>
             <ion-label>Remember me</ion-label>
           </div>
+          <a class="forgot-password-link" (click)="openForgotPassword()">
+            Forgot Password?
+          </a>
         </div>
 
         <ion-button expand="block" type="submit" class="login-button">
@@ -93,6 +98,51 @@
       <p>MyQueue v1.0.0</p>
     </div>
 
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div class="forgot-password-overlay" *ngIf="showForgotPassword">
+    <div class="forgot-password-modal">
+
+      <div class="modal-header">
+        <div class="header-icon">
+          <ion-icon name="key-outline"></ion-icon>
+        </div>
+        <h2>Reset Password</h2>
+        <p>Enter your email and we’ll send a password reset link.</p>
+
+        <ion-button fill="clear" class="close-btn" (click)="closeForgotPassword()">
+          <ion-icon slot="icon-only" name="close"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="modal-body">
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <div class="input-icon" slot="start">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+
+            <ion-input [(ngModel)]="resetEmail" type="email" placeholder="Enter your email address"
+              class="custom-input">
+            </ion-input>
+          </ion-item>
+        </div>
+
+        <div class="info-note">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <p>Check your inbox (and spam folder) after sending.</p>
+        </div>
+
+        <ion-button expand="block" class="reset-btn" [disabled]="!resetEmail || isSendingReset"
+          (click)="sendResetLink()">
+          <ion-spinner *ngIf="isSendingReset" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isSendingReset" slot="start" name="send-outline"></ion-icon>
+          {{ isSendingReset ? 'Sending...' : 'Send Reset Link' }}
+        </ion-button>
+      </div>
+
+    </div>
   </div>
 
 </ion-content>

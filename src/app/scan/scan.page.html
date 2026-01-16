@@ -1,4 +1,4 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-button (click)="main.navigateBack()">
@@ -6,6 +6,18 @@
       </ion-button>
     </ion-buttons>
     <ion-title>QR Check-In</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+<ion-header [translucent]="true" class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="main.navigateBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      <span>Check-In</span>
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 

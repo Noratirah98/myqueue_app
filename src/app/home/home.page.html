@@ -84,7 +84,7 @@
               <ion-icon name="qr-code-outline"></ion-icon>
             </div>
             <div class="card-text">
-              <h2>Scan QR Code 2</h2>
+              <h2>Scan QR Code</h2>
               <p>Check in for your visit</p>
             </div>
             <div class="card-arrow">
@@ -289,6 +289,34 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="logout-overlay" *ngIf="showLogoutConfirm">
+      <div class="logout-modal">
+
+        <div class="logout-icon-wrapper">
+          <div class="logout-icon">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </div>
+        </div>
+
+        <div class="logout-content">
+          <h2 class="logout-title">Logout</h2>
+          <p class="logout-message">Are you sure you want to logout?</p>
+        </div>
+
+        <div class="logout-actions">
+          <ion-button expand="block" fill="outline" class="cancel-btn" (click)="showLogoutConfirm = false">
+            Cancel
+          </ion-button>
+          <ion-button expand="block" color="danger" class="confirm-btn" (click)="confirmLogout()">
+            <ion-icon slot="start" name="log-out"></ion-icon>
+            Yes, Logout
+          </ion-button>
+        </div>
+
+      </div>
     </div>
 
   </div>

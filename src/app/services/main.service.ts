@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavController, ToastController } from '@ionic/angular';
+import { AlertController, NavController, ToastController } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
@@ -7,6 +7,7 @@ import { NavController, ToastController } from '@ionic/angular';
 export class MainService {
   constructor(
     private navCtrl: NavController,
+    private alertCtrl: AlertController,
     private toastController: ToastController
   ) {}
 
@@ -42,5 +43,33 @@ export class MainService {
       ],
     });
     await toast.present();
+  }
+
+  async presentConfirm(header: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: cancelText,
+          role: 'cancel',
+          cssClass: 'alert-cancel-btn',
+        },
+        {
+          text: confirmText,
+          cssClass: 'alert-confirm-btn',
+          handler: () => {
+            if (onConfirm) onConfirm();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+
+    const msgEl = document.querySelector('.alert-message');
+    if (msgEl) {
+      msgEl.innerHTML = message;
+    }
   }
 }

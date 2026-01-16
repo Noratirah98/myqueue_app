@@ -79,3 +79,15 @@ body.dark {
         }
     }
 }
+
+/* Cancel button in grey */
+.alert-cancel-btn {
+  color: var(--ion-color-medium) !important;
+  font-weight: 600;
+}
+
+/* Confirm button in red */
+.alert-confirm-btn {  
+  color: var(--ion-color-danger) !important;
+  font-weight: 600;
+}

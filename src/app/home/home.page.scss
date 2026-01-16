@@ -947,3 +947,240 @@ ion-content.modern-content {
 		transition-duration: 0.01ms !important;
 	}
 }
+
+// ============================================
+// LOGOUT CONFIRMATION MODAL
+// ============================================
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.logout-modal {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 380px;
+  padding: 32px 24px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+  text-align: center;
+}
+
+.logout-icon-wrapper {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.logout-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(239, 83, 80, 0.4);
+  animation: iconPulse 2s ease-in-out infinite;
+  
+  ion-icon {
+    font-size: 42px;
+    color: white;
+  }
+}
+
+.logout-content {
+  margin-bottom: 28px;
+}
+
+.logout-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--ion-color-dark);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.logout-message {
+  font-size: 16px;
+  color: var(--ion-color-medium);
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.logout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cancel-btn {
+  --border-width: 2px;
+  --border-color: var(--ion-color-medium);
+  --color: var(--ion-color-medium);
+  --border-radius: 14px;
+  height: 52px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  margin: 0;
+  
+  &:hover {
+    --background: var(--ion-color-light);
+  }
+}
+
+.confirm-btn {
+  --background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+  --border-radius: 14px;
+  --box-shadow: 0 6px 20px rgba(239, 83, 80, 0.4);
+  height: 52px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+  margin: 0;
+  
+  ion-icon {
+    font-size: 22px;
+  }
+  
+  &:hover {
+    --box-shadow: 0 8px 24px rgba(239, 83, 80, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ============================================
+// ANIMATIONS
+// ============================================
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 24px rgba(239, 83, 80, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(239, 83, 80, 0.6);
+  }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+@media (min-width: 576px) {
+  .logout-actions {
+    flex-direction: row;
+    
+    .cancel-btn,
+    .confirm-btn {
+      flex: 1;
+    }
+  }
+}
+
+// ============================================
+// ALTERNATIVE: Using Ionic Alert (Enhanced Styling)
+// ============================================
+// Add this to your global.scss if you want to enhance Ionic's default alert
+
+.custom-logout-alert {
+  --backdrop-opacity: 0.6;
+  
+  .alert-wrapper {
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+  }
+  
+  .alert-head {
+    padding: 28px 24px 16px;
+    text-align: center;
+    
+    h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--ion-color-dark);
+    }
+  }
+  
+  .alert-message {
+    padding: 8px 24px 24px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--ion-color-medium);
+    line-height: 1.6;
+  }
+  
+  .alert-button-group {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    .alert-button {
+      height: 48px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      margin: 0;
+      
+      &.alert-cancel-btn {
+        background: var(--ion-color-light);
+        color: var(--ion-color-medium);
+        border: 2px solid var(--ion-color-medium);
+      }
+      
+      &.alert-confirm-btn {
+        background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 83, 80, 0.4);
+      }
+    }
+  }
+}
+
+@media (min-width: 576px) {
+  .custom-logout-alert {
+    .alert-button-group {
+      flex-direction: row;
+      
+      .alert-button {
+        flex: 1;
+      }
+    }
+  }
+}

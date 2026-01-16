@@ -4,6 +4,8 @@ import { getAuth, signOut } from 'firebase/auth';
 import { getDatabase, ref, onValue, query, orderByChild, equalTo, get } from "firebase/database";
 import { AuthService } from '../services/auth.service';
 import { StorageService } from '../services/storage.service';
+import { MainService } from '../services/main.service';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -24,13 +26,15 @@ export class HomePage implements OnInit {
   currentServingNumber = '';
   peopleAhead = 0;
   estimatedWaitTime = 0;
-
   loadingAppointment = true;
+  showLogoutConfirm = false;
 
   constructor(
     private router: Router,
+    private main: MainService,
     private auth: AuthService,
     private storage: StorageService,
+    private loadingController: LoadingController,
   ) {}
 
   handleRefresh(event: any) {
@@ -177,19 +181,43 @@ export class HomePage implements OnInit {
   }
 
   async logout() {
-    const auth = getAuth();
+    // await this.main.presentConfirm(
+    //   'Confirm',
+    //   'Are you sure you want to log out?',
+    //   'Yes',
+    //   'Cancel',
+    //   async () => {
+    //     this.logoutProcess();  
+    //   }
+    // );
+
+     this.showLogoutConfirm = true;
+  }
+
+  async confirmLogout() {
+    this.showLogoutConfirm = false;
+
+    const loading = await this.loadingController.create({
+      message: 'Logging out...',
+      duration: 1500
+    });
+    await loading.present();
 
     try {
-      // await signOut(auth);
-      const uid = getAuth().currentUser?.uid;
+      const auth = getAuth();
+      // const uid = getAuth().currentUser?.uid;
       await this.storage.remove('patientName');
       await this.storage.remove('uid');
-      await signOut(getAuth());
+      await signOut(auth);
 
-      // Redirect to login & block back navigation
+      console.log('User logged out successfully');
+      await this.main.showToast('Logged out successfully','success', 'checkmark-done-circle');
       this.router.navigateByUrl('/login', { replaceUrl: true });
-    } catch (err) {
-      console.error('Logout failed', err);
+    } catch (error) {
+      console.error('Logout error:', error);
+      await this.main.showToast('Error logging out. Please try again.', 'danger', 'alert-circle');
+    } finally {
+      await loading.dismiss();
     }
   }
 

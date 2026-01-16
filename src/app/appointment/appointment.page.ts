@@ -26,7 +26,6 @@ interface AppointmentType {
 })
 
 export class AppointmentPage implements OnInit {
-
   currentStep = 1;
   appointmentForm: FormGroup;
 
@@ -84,7 +83,6 @@ export class AppointmentPage implements OnInit {
   isLoading = false;
 
   constructor(
-    private router: Router,
     private fb: FormBuilder,
     private auth: AuthService,
     private main: MainService,
@@ -101,16 +99,19 @@ export class AppointmentPage implements OnInit {
   }
 
   ngOnInit() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    this.selectedDateObj = tomorrow;
 
     // Set max date to 3 months from now
-    const maxDate = new Date(today);
+    const maxDate = new Date(tomorrow);
     maxDate.setMonth(maxDate.getMonth() + 3);
 
-    this.selectedDateObj = today;
+    this.selectedDateObj = this.getNextWorkingDay(tomorrow);
     this.updateDisplayDate();
-    this.minDate = today.toISOString().split('T')[0];
+    this.minDate = tomorrow.toISOString().split('T')[0];
     this.maxDate = maxDate.toISOString().split('T')[0];
   }
 
@@ -171,6 +172,17 @@ export class AppointmentPage implements OnInit {
     this.loadTimeSlots();
   }
 
+  getNextWorkingDay(date: Date): Date {
+    const nextDate = new Date(date);
+    nextDate.setHours(0, 0, 0, 0);
+
+    do {
+      nextDate.setDate(nextDate.getDate() + 1);
+    } while (nextDate.getDay() === 0 || nextDate.getDay() === 6);
+
+    return nextDate;
+  }
+
   onCalendarSelected(value: string | string[] | null | undefined) {
     if (!value) return;
     
@@ -190,12 +202,20 @@ export class AppointmentPage implements OnInit {
   isBlockedDate(date: Date): boolean {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+
     const maxDateObj = new Date(this.maxDate);
-    const day = date.getDay();
-    
-    // Block: past dates, weekends, dates beyond max
-    return date < today || day === 0 || day === 6 || date > maxDateObj;
+    maxDateObj.setHours(0, 0, 0, 0);
+
+    const day = selectedDate.getDay();
+
+    return (
+      selectedDate <= today ||   // block hari ini & sebelum
+      day === 0 || day === 6 ||   // block weekend
+      selectedDate > maxDateObj  // block lebih maxDate
+    );
   }
 
   isDateEnabled = (dateStr: string): boolean => {
@@ -210,8 +230,12 @@ export class AppointmentPage implements OnInit {
       year: 'numeric'
     });
 
+    // this.appointmentForm.patchValue({
+    //   date: this.selectedDateObj.toISOString().split('T')[0]
+    // });
+
     this.appointmentForm.patchValue({
-      date: this.selectedDateObj.toISOString().split('T')[0]
+      date: this.formatLocalDate(this.selectedDateObj)
     });
   }
 
@@ -305,7 +329,11 @@ export class AppointmentPage implements OnInit {
         return;
       }
 
-      const selectedDate = this.appointmentForm.value.date as string | null;
+      const selectedDate: string | null =
+        this.appointmentForm.value.date
+          ? this.formatLocalDate(this.appointmentForm.value.date)
+          : null;
+
       if (!selectedDate) {
         await this.main.showToast('Please select a date', 'danger');
         return;
@@ -363,6 +391,18 @@ export class AppointmentPage implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  formatLocalDate(dateInput: Date | string): string {
+    const d = typeof dateInput === 'string'
+      ? new Date(dateInput + 'T00:00:00') // FORCE LOCAL
+      : new Date(dateInput);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
   }
 
   async hasAppointmentOnDate(uid: string, date: string): Promise<boolean> {
@@ -435,9 +475,13 @@ export class AppointmentPage implements OnInit {
     this.selectedType = null;
     this.selectedSlot = null;
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    this.selectedDateObj = today;
+    // const today = new Date();
+    // today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    this.selectedDateObj = this.getNextWorkingDay(tomorrow);
     this.updateDisplayDate();
   }
 

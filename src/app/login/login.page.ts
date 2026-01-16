@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { Router } from '@angular/router';
-import { AlertController, LoadingController } from '@ionic/angular';
+import { AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
 import { get, getDatabase, ref } from 'firebase/database';
 import { StorageService } from '../services/storage.service';
@@ -13,23 +13,48 @@ import { StorageService } from '../services/storage.service';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
+  @ViewChildren('codeInput') codeInputs!: QueryList<ElementRef>;
+  
   loginData = {
     email: '',
     password: ''
   };
 
-  showPassword: boolean = false;
-  rememberMe: boolean = false;
+  showPassword = false;
+  rememberMe = false;
+
+  showForgotPassword = false;
+  resetEmail = '';
+  isSendingReset = false;
 
   constructor(
     private router: Router,
     private main: MainService,
     private storage: StorageService,
     private alertController: AlertController,
+    private toastController: ToastController,
     private loadingController: LoadingController,
   ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.checkRememberedUser();
+  }
+
+  // ============================================
+  // LOGIN METHODS
+  // ============================================
+
+  checkRememberedUser() {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+      this.loginData.email = rememberedEmail;
+      this.rememberMe = true;
+    }
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
 
   async login() {
     if (!this.loginData.email || !this.loginData.password) {
@@ -46,8 +71,7 @@ export class LoginPage implements OnInit {
     await loading.present();
 
     try {
-      const auth = getAuth();
-
+      const auth  = getAuth();
       const email = this.loginData.email.trim();
 
       const userCredential = await signInWithEmailAndPassword(
@@ -78,7 +102,12 @@ export class LoginPage implements OnInit {
         this.handleFirebaseLoginError(error);
       }
 
-      if (this.rememberMe) localStorage.setItem('rememberMe', 'true');
+      // Handle remember me
+      if (this.rememberMe) {
+        localStorage.setItem('rememberedEmail', this.loginData.email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
 
       await loading.dismiss();
       await this.main.showToast('Login successfully', 'success', 'checkmark-done-circle');
@@ -98,9 +127,9 @@ export class LoginPage implements OnInit {
       case 'auth/invalid-credential':
         message = 'Incorrect email or password.';
         break;
-
+        
       case 'auth/user-not-found':
-        message = 'Email not found. Please register at the clinic counter.';
+        message = 'This email is not registered in our system. Please visit the clinic counter to register or update your account during your first visit.';
         break;
 
       case 'auth/wrong-password':
@@ -132,10 +161,7 @@ export class LoginPage implements OnInit {
     return emailRegex.test(email);
   }
 
-  togglePasswordVisibility() {
-    this.showPassword = !this.showPassword;
-  }
-
+  // Helper Methods
   async showHelpInfo() {
     const alert = await this.alertController.create({
       header: 'Login Help',
@@ -148,10 +174,98 @@ export class LoginPage implements OnInit {
           Please use the email password reset feature.
 
           Login Issues?
-          Make sure your email format is correct.`,
+          Make sure your email format is correct.
+
+          <p><strong>Support:</strong></p>
+          <p>Email: support@myqueue.com<br>
+          Phone: 1-800-MY-QUEUE</p>`,
       buttons: ['Close']
     });
 
     await alert.present();
   }
+
+  openForgotPassword() {
+    this.showForgotPassword = true;
+    this.resetEmail = (this.loginData.email || '').trim();
+  }
+
+  closeForgotPassword() {
+    this.showForgotPassword = false;
+    this.resetEmail = '';
+  }
+
+  async sendResetLink() {
+    const email = (this.resetEmail || '').trim();
+
+    if (!email || !this.isValidEmail(email)) {
+      await this.main.showToast('Please enter a valid email address', 'warning', 'alert-circle-outline', 'top');
+      return;
+    }
+
+    this.isSendingReset = true;
+
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+
+      await this.main.showToast('Reset link sent. Please check your email.', 'success', 'mail-outline', 'top');
+
+      // optional: auto close modal
+      this.closeForgotPassword();
+
+    } catch (error: any) {
+      let msg = 'Failed to send reset email. Please try again.';
+      if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
+      if (error.code === 'auth/invalid-email') msg = 'Invalid email format.';
+      if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
+
+      await this.main.showToast(msg, 'danger', 'alert-circle-outline', 'top');
+    } finally {
+      this.isSendingReset = false;
+    }
+  }
+
+  // async forgotPassword() {
+  //   const email = (this.loginData.email || '').trim();
+
+  //   if (!email) {
+  //     await this.main.showToast('Please enter your email first', 'warning', 'mail-outline', 'top');
+  //     return;
+  //   }
+
+  //   if (!this.isValidEmail(email)) {
+  //     await this.main.showToast('Invalid email format', 'danger', 'alert-circle-outline', 'top');
+  //     return;
+  //   }
+
+  //   const loading = await this.loadingController.create({
+  //     message: 'Sending reset email...'
+  //   });
+  //   await loading.present();
+
+  //   try {
+  //     const auth = getAuth();
+  //     await sendPasswordResetEmail(auth, email);
+
+  //     await loading.dismiss();
+
+  //     const alert = await this.alertController.create({
+  //       header: 'Reset Email Sent',
+  //       message: `We/'ve sent a password reset link to <b>${email}</b>. Please check your inbox (and spam folder).`,
+  //       buttons: ['OK']
+  //     });
+  //     await alert.present();
+
+  //   } catch (error: any) {
+  //     await loading.dismiss();
+
+  //     let msg = 'Failed to send reset email. Please try again.';
+  //     if (error.code === 'auth/user-not-found') msg = 'Email not found. Please contact the clinic counter.';
+  //     if (error.code === 'auth/invalid-email') msg = 'Invalid email format.';
+  //     if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
+
+  //     await this.main.showToast(msg, 'danger', 'alert-circle-outline', 'top');
+  //   }
+  // }
 }
