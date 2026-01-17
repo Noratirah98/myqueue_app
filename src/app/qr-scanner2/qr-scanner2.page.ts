@@ -9,18 +9,16 @@ import { MainService } from '../services/main.service';
   templateUrl: './qr-scanner2.page.html',
   styleUrls: ['./qr-scanner2.page.scss'],
 })
-
 export class QrScanner2Page implements OnInit, OnDestroy {
-
   scanActive: boolean = false;
   scannedData: string = '';
   hasPermission: boolean | null = null;
-  
+
   // Mock clinic data for demo
   appointmentInfo = {
     appointmentType: 'General Treatment',
     date: '2025-12-22',
-    time: '3:30 PM'
+    time: '3:30 PM',
   };
 
   constructor(
@@ -37,7 +35,7 @@ export class QrScanner2Page implements OnInit, OnDestroy {
   async checkPermission() {
     try {
       const status = await BarcodeScanner.checkPermission({ force: true });
-      
+
       if (status.granted) {
         this.hasPermission = true;
       } else if (status.denied) {
@@ -57,19 +55,20 @@ export class QrScanner2Page implements OnInit, OnDestroy {
   async showPermissionAlert() {
     const alert = await this.alertController.create({
       header: 'Camera Permission Required',
-      message: 'MyQueue needs camera access to scan QR codes. Please enable camera permission in your device settings.',
+      message:
+        'MyQueue needs camera access to scan QR codes. Please enable camera permission in your device settings.',
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Open Settings',
           handler: () => {
             BarcodeScanner.openAppSettings();
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -107,20 +106,20 @@ export class QrScanner2Page implements OnInit, OnDestroy {
   async processQRCode(qrData: string) {
     const loading = await this.loadingController.create({
       message: 'Processing...',
-      duration: 1500
+      duration: 1500,
     });
 
     await loading.present();
 
     // TODO: Validate QR code format and clinic ID
     // Expected format: "MYQUEUE-CLINIC-{clinicId}-{timestamp}"
-    
+
     if (this.isValidQRCode(qrData)) {
       const clinicId = this.extractClinicId(qrData);
-      
+
       // TODO: Check if user has appointment today
       // TODO: Generate queue number from Firebase
-      
+
       setTimeout(async () => {
         await loading.dismiss();
         await this.generateQueueNumber(clinicId);
@@ -150,17 +149,21 @@ export class QrScanner2Page implements OnInit, OnDestroy {
     // 2. Check existing queue numbers for today
     // 3. Generate next number (e.g., Q012)
     // 4. Save to Firebase with status 'waiting'
-    
-    const mockQueueNumber = 'Q' + Math.floor(Math.random() * 100).toString().padStart(3, '0');
-    
+
+    const mockQueueNumber =
+      'Q' +
+      Math.floor(Math.random() * 100)
+        .toString()
+        .padStart(3, '0');
+
     const queueData = {
       queueNumber: mockQueueNumber,
       clinicId: clinicId,
       userId: 'current-user-id', // TODO: Get from auth
-      date: new Date().toISOString().split('T')[0],
+      date: this.main.getToday(),
       checkInTime: new Date().toISOString(),
       status: 'waiting',
-      estimatedWaitTime: 20
+      estimatedWaitTime: 20,
     };
 
     // TODO: Save to Firebase
@@ -185,12 +188,12 @@ export class QrScanner2Page implements OnInit, OnDestroy {
           text: 'OK',
           handler: () => {
             // Navigate to home with queue status
-            this.router.navigate(['/home'], { 
-              queryParams: { queueNumber: queueNumber } 
+            this.router.navigate(['/home'], {
+              queryParams: { queueNumber: queueNumber },
             });
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -199,19 +202,20 @@ export class QrScanner2Page implements OnInit, OnDestroy {
   async showInvalidQRAlert() {
     const alert = await this.alertController.create({
       header: '❌ Invalid QR Code',
-      message: 'The scanned QR code is not from the MyQueue system. Please scan the QR code provided at the clinic counter.',
+      message:
+        'The scanned QR code is not from the MyQueue system. Please scan the QR code provided at the clinic counter.',
       buttons: [
         {
           text: 'Try Again',
           handler: () => {
             this.startScan();
-          }
+          },
         },
         {
           text: 'Back',
-          role: 'cancel'
-        }
-      ]
+          role: 'cancel',
+        },
+      ],
     });
 
     await alert.present();

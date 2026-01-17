@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { AlertController, NavController, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  NavController,
+  ToastController,
+} from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
@@ -8,7 +12,7 @@ export class MainService {
   constructor(
     private navCtrl: NavController,
     private alertCtrl: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
   ) {}
 
   navigateForward(page: any, data: any = null) {
@@ -27,7 +31,7 @@ export class MainService {
     message: string,
     color: string = 'primary',
     icon: string = 'alert-circle-outline',
-    position: 'top' | 'bottom' | 'middle' = 'top'
+    position: 'top' | 'bottom' | 'middle' = 'top',
   ) {
     const toast = await this.toastController.create({
       message,
@@ -45,7 +49,13 @@ export class MainService {
     await toast.present();
   }
 
-  async presentConfirm(header: string, message: string, confirmText: string, cancelText: string, onConfirm: () => void) {
+  async presentConfirm(
+    header: string,
+    message: string,
+    confirmText: string,
+    cancelText: string,
+    onConfirm: () => void,
+  ) {
     const alert = await this.alertCtrl.create({
       header,
       message,
@@ -60,9 +70,9 @@ export class MainService {
           cssClass: 'alert-confirm-btn',
           handler: () => {
             if (onConfirm) onConfirm();
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -71,5 +81,13 @@ export class MainService {
     if (msgEl) {
       msgEl.innerHTML = message;
     }
+  }
+
+  getToday(): string {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`; // local date
   }
 }

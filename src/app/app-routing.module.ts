@@ -77,6 +77,10 @@ const routes: Routes = [
     path: 'queue',
     loadChildren: () => import('./queue/queue.module').then( m => m.QueuePageModule)
   },
+  {
+    path: 'scan2',
+    loadChildren: () => import('./scan2/scan2.module').then( m => m.Scan2PageModule)
+  },
 ];
 
 @NgModule({

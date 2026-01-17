@@ -13,7 +13,7 @@
   <div class="modal-content">
 
     <!-- Status Badge -->
-    <div class="status-badge" [attr.data-status]="appt.status">
+    <div *ngIf="appt.status==='cancelled'" class="status-badge" [attr.data-status]="appt.status">
       <ion-icon [name]="getStatusIcon(appt.status)"></ion-icon>
       <span>{{ getStatusText(appt.status) }}</span>
     </div>

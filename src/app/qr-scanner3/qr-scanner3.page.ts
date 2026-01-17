@@ -1,10 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { equalTo, get, getDatabase, orderByChild, query, ref, set, update } from 'firebase/database';
+import {
+  equalTo,
+  get,
+  getDatabase,
+  orderByChild,
+  query,
+  ref,
+  set,
+  update,
+} from 'firebase/database';
 import { MainService } from '../services/main.service';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-
 
 @Component({
   selector: 'app-qr-scanner3',
@@ -17,12 +25,10 @@ export class QrScanner3Page implements OnInit {
   constructor(
     private router: Router,
     public main: MainService,
-    private auth: AuthService  
+    private auth: AuthService,
   ) {}
 
-  ngOnInit() {
-    
-  }
+  ngOnInit() {}
 
   /* START SCAN */
   async scanQR() {
@@ -65,23 +71,27 @@ export class QrScanner3Page implements OnInit {
     const uid = this.auth.getUID();
     if (!uid) return;
 
-    const today          = new Date().toISOString().split('T')[0];
-    const db             = getDatabase();
-    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const today = this.main.getToday();
+    const db = getDatabase();
+    const appointmentRef = query(
+      ref(db, 'appointments'),
+      orderByChild('uid'),
+      equalTo(uid),
+    );
 
     const snapshot = await get(appointmentRef);
 
     let appointment: any = null;
-    let appointmentId    = '';
+    let appointmentId = '';
 
-    snapshot.forEach(child => {
+    snapshot.forEach((child) => {
       const data = child.val();
       if (
         data.uid === uid &&
         data.date === today &&
         data.status === 'pending'
       ) {
-        appointment   = data;
+        appointment = data;
         appointmentId = child.key!;
       }
     });
@@ -90,7 +100,7 @@ export class QrScanner3Page implements OnInit {
       await this.main.showToast(
         'No valid appointment for today',
         'danger',
-        'alert-circle-outline'
+        'alert-circle-outline',
       );
       return;
     }
@@ -100,24 +110,24 @@ export class QrScanner3Page implements OnInit {
 
   /* ------------------------- FCFS QUEUE GENERATION --------------------------*/
   async generateQueue(appointment: any, appointmentId: string) {
-    const today = new Date().toISOString().split('T')[0];
-    const db    = getDatabase();
+    const today = this.main.getToday();
+    const db = getDatabase();
 
-    const type     = appointment.appointmentType;
+    const type = appointment.appointmentType;
     const queueRef = ref(db, `queues/${today}/${type}`);
     const snapshot = await get(queueRef); // Read current queue
-    const count    = snapshot.exists() ? snapshot.size : 0; // Count how many people already queued
+    const count = snapshot.exists() ? snapshot.size : 0; // Count how many people already queued
 
     const prefixMap: any = {
-      general     : 'G',
-      dental      : 'D',
-      maternal    : 'M',
-      child       : 'C',
-      vaccination : 'V',
-      chronic     : 'K'
+      general: 'G',
+      dental: 'D',
+      maternal: 'M',
+      child: 'C',
+      vaccination: 'V',
+      chronic: 'K',
     };
 
-    const prefix      = prefixMap[type] || 'Q';
+    const prefix = prefixMap[type] || 'Q';
     const queueNumber = `${prefix}${(count + 1).toString().padStart(3, '0')}`; // Next person gets next number
 
     // Count how many people already queued
@@ -125,18 +135,18 @@ export class QrScanner3Page implements OnInit {
       uid: appointment.uid,
       appointmentId,
       status: 'waiting',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
 
     await update(ref(db, `appointments/${appointmentId}`), {
       status: 'checked_in',
-      queueNumber
+      queueNumber,
     });
 
     await this.main.showToast(
       `Check-in successful! Queue: ${queueNumber}`,
       'success',
-      'checkmark-circle-outline'
+      'checkmark-circle-outline',
     );
 
     this.router.navigate(['/home']);

@@ -1,0 +1,64 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Clinic Check-in</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="page">
+
+  <!-- Appointment required -->
+  <div class="card" *ngIf="!hasValidAppointment">
+    <ion-icon name="calendar-outline" class="big-icon"></ion-icon>
+    <h2>No Appointment Today</h2>
+    <p>You can only check in if you have an appointment scheduled for today.</p>
+
+    <ion-button expand="block" routerLink="/appointment-list">
+      View My Appointments
+    </ion-button>
+  </div>
+
+  <!-- Eligible -->
+  <div class="card" *ngIf="hasValidAppointment">
+    <div class="row">
+      <div>
+        <h2>Appointment Verified ✅</h2>
+        <p class="sub">You are eligible to check in today.</p>
+      </div>
+      <ion-badge color="success">Today</ion-badge>
+    </div>
+
+    <div class="info">
+      <div class="info-item">
+        <span class="label">Type</span>
+        <span class="value">{{ todayAppointment?.appointmentType }}</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Time</span>
+        <span class="value">{{ todayAppointment?.time }}</span>
+      </div>
+    </div>
+
+    <ion-button expand="block" class="scan-btn" [disabled]="isScanning || isGenerating" (click)="startScan()">
+      <ion-spinner *ngIf="isScanning || isGenerating" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!(isScanning || isGenerating)" name="qr-code-outline" slot="start"></ion-icon>
+      {{ (isScanning || isGenerating) ? 'Processing...' : 'Scan Clinic QR' }}
+    </ion-button>
+
+    <div class="result" *ngIf="generatedQueueNumber">
+      <h3>Your Queue Number</h3>
+      <div class="queue">{{ generatedQueueNumber }}</div>
+
+      <div class="meta">
+        <ion-chip color="primary" *ngIf="scannedType">
+          <ion-icon name="medkit-outline"></ion-icon>
+          <ion-label>{{ scannedType }}</ion-label>
+        </ion-chip>
+      </div>
+
+      <ion-button expand="block" color="tertiary" routerLink="/queue">
+        View Live Queue Status
+      </ion-button>
+    </div>
+  </div>
+
+</ion-content>

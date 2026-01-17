@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { MainService } from '../services/main.service';
-import { equalTo, getDatabase, onValue, orderByChild, push, query, ref } from 'firebase/database';
+import {
+  equalTo,
+  getDatabase,
+  onValue,
+  orderByChild,
+  push,
+  query,
+  ref,
+} from 'firebase/database';
 
 @Component({
   selector: 'app-queue',
@@ -35,27 +43,31 @@ export class QueuePage implements OnInit {
     const uid = this.auth.getUID();
     if (!uid) return;
 
-    const today          = new Date().toISOString().split('T')[0];
-    const db             = getDatabase();
-    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const today = this.main.getToday();
+    const db = getDatabase();
+    const appointmentRef = query(
+      ref(db, 'appointments'),
+      orderByChild('uid'),
+      equalTo(uid),
+    );
 
-    onValue(appointmentRef, snapshot => {
+    onValue(appointmentRef, (snapshot) => {
       this.todayAppointment = null;
 
-      snapshot.forEach(child => {
-      const data = child.val();
+      snapshot.forEach((child) => {
+        const data = child.val();
 
-      if (
-        data.uid === uid &&
-        data.date === today &&
-        data.status === 'pending'
-      ) {
-        this.todayAppointment = {
-          id: child.key,
-          ...data
-        };
-      }
-    });
+        if (
+          data.uid === uid &&
+          data.date === today &&
+          data.status === 'pending'
+        ) {
+          this.todayAppointment = {
+            id: child.key,
+            ...data,
+          };
+        }
+      });
     });
   }
 
@@ -75,7 +87,7 @@ export class QueuePage implements OnInit {
       uid: this.auth.getUID(),
       appointmentId: this.todayAppointment.id,
       status: 'waiting',
-      createdAt: Date.now()
+      createdAt: Date.now(),
     });
 
     this.myQueueNumber = newQueue.key!;
@@ -92,25 +104,24 @@ export class QueuePage implements OnInit {
     const db = getDatabase();
     const queueRef = ref(db, 'queues/general');
 
-    onValue(queueRef, snapshot => {
+    onValue(queueRef, (snapshot) => {
       const queueList: any[] = [];
 
-      snapshot.forEach(child => {
+      snapshot.forEach((child) => {
         queueList.push({ id: child.key, ...child.val() });
       });
 
       // FCFS sort
       queueList.sort((a, b) => a.createdAt - b.createdAt);
 
-      const servingIndex = queueList.findIndex(q => q.status === 'serving');
-      const myIndex = queueList.findIndex(q => q.id === this.myQueueNumber);
+      const servingIndex = queueList.findIndex((q) => q.status === 'serving');
+      const myIndex = queueList.findIndex((q) => q.id === this.myQueueNumber);
 
-      this.currentServing = servingIndex >= 0 ? queueList[servingIndex].id : '-';
+      this.currentServing =
+        servingIndex >= 0 ? queueList[servingIndex].id : '-';
 
       if (myIndex >= 0) {
-        this.peopleAhead = servingIndex >= 0
-          ? myIndex - servingIndex
-          : myIndex;
+        this.peopleAhead = servingIndex >= 0 ? myIndex - servingIndex : myIndex;
 
         this.status = queueList[myIndex].status;
       }

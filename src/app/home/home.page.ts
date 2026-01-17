@@ -1,7 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { getAuth, signOut } from 'firebase/auth';
-import { getDatabase, ref, onValue, query, orderByChild, equalTo, get } from "firebase/database";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  query,
+  orderByChild,
+  equalTo,
+  get,
+} from 'firebase/database';
 import { AuthService } from '../services/auth.service';
 import { StorageService } from '../services/storage.service';
 import { MainService } from '../services/main.service';
@@ -68,9 +76,9 @@ export class HomePage implements OnInit {
       this.userName = cachedName;
     } else {
       try {
-        const db          = getDatabase();
+        const db = getDatabase();
         const patientSnap = await get(ref(db, `patients/${uid}`));
-        const patient     = patientSnap.exists() ? patientSnap.val() : null;
+        const patient = patientSnap.exists() ? patientSnap.val() : null;
         const patientName = patient?.username ?? 'Patient';
 
         this.userName = patientName;
@@ -91,10 +99,14 @@ export class HomePage implements OnInit {
       return;
     }
 
-    const db             = getDatabase();
-    const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const db = getDatabase();
+    const appointmentRef = query(
+      ref(db, 'appointments'),
+      orderByChild('uid'),
+      equalTo(uid),
+    );
 
-    onValue(appointmentRef, snapshot => {
+    onValue(appointmentRef, (snapshot) => {
       if (!snapshot.exists()) {
         this.nextAppointment = null;
         this.loadingAppointment = false;
@@ -103,17 +115,20 @@ export class HomePage implements OnInit {
 
       const list: any[] = [];
 
-      snapshot.forEach(child => {
+      snapshot.forEach((child) => {
         const data = child.val();
 
-        if (data.uid === uid && (data.status === 'pending' || data.status === 'confirmed')) {
+        if (
+          data.uid === uid &&
+          (data.status === 'pending' || data.status === 'confirmed')
+        ) {
           list.push({
             id: child.key,
             date: data.date,
             time: data.time,
             appointmentType: data.appointmentType,
             status: data.status,
-            createdAt: data.createdAt
+            createdAt: data.createdAt,
           });
         }
       });
@@ -122,13 +137,13 @@ export class HomePage implements OnInit {
       today.setHours(0, 0, 0, 0);
 
       const upcoming = list
-        .filter(a => {
+        .filter((a) => {
           const d = new Date(a.date);
           d.setHours(0, 0, 0, 0);
           return d >= today;
         })
-        .sort((a, b) =>
-          new Date(a.date).getTime() - new Date(b.date).getTime()
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
 
       // ONLY ONE (nearest)
@@ -157,7 +172,7 @@ export class HomePage implements OnInit {
   }
 
   scanQRCode2() {
-    this.router.navigate(['/queue']);
+    this.router.navigate(['/scan2']);
   }
 
   scanQRCode3() {
@@ -187,11 +202,11 @@ export class HomePage implements OnInit {
     //   'Yes',
     //   'Cancel',
     //   async () => {
-    //     this.logoutProcess();  
+    //     this.logoutProcess();
     //   }
     // );
 
-     this.showLogoutConfirm = true;
+    this.showLogoutConfirm = true;
   }
 
   async confirmLogout() {
@@ -199,7 +214,7 @@ export class HomePage implements OnInit {
 
     const loading = await this.loadingController.create({
       message: 'Logging out...',
-      duration: 1500
+      duration: 1500,
     });
     await loading.present();
 
@@ -211,11 +226,19 @@ export class HomePage implements OnInit {
       await signOut(auth);
 
       console.log('User logged out successfully');
-      await this.main.showToast('Logged out successfully','success', 'checkmark-done-circle');
+      await this.main.showToast(
+        'Logged out successfully',
+        'success',
+        'checkmark-done-circle',
+      );
       this.router.navigateByUrl('/login', { replaceUrl: true });
     } catch (error) {
       console.error('Logout error:', error);
-      await this.main.showToast('Error logging out. Please try again.', 'danger', 'alert-circle');
+      await this.main.showToast(
+        'Error logging out. Please try again.',
+        'danger',
+        'alert-circle',
+      );
     } finally {
       await loading.dismiss();
     }
@@ -228,7 +251,7 @@ export class HomePage implements OnInit {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
