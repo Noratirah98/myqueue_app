@@ -12,6 +12,7 @@ import {
 } from 'firebase/database';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { getAuth } from 'firebase/auth';
+import { Router } from '@angular/router';
 
 type AppointmentStatus =
   | 'pending'
@@ -35,18 +36,24 @@ export class Scan2Page implements OnInit {
   scannedType: string = '';
   generatedQueueNumber: string = '';
 
+  content_visibility = '';
+
   constructor(
     private auth: AuthService,
     private main: MainService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
     this.validateTodayAppointment();
   }
 
-  /* -------------------------------
-   STEP 7.1 — VALIDATE TODAY APPOINTMENT
-  --------------------------------*/
+  private getUidSafe(): string | null {
+    const authUser = getAuth().currentUser;
+    return authUser?.uid || this.auth.getUID() || null;
+  }
+
+  /* VALIDATE TODAY APPOINTMENT */
   async validateTodayAppointment() {
     const uid = this.getUidSafe();
     if (!uid) {
@@ -57,10 +64,7 @@ export class Scan2Page implements OnInit {
 
     const today = this.main.getToday();
 
-    console.log('Today: ', today);
-
     const db = getDatabase();
-    // IMPORTANT: this query matches your security rules (read by uid)
     const { query, orderByChild, equalTo } = await import('firebase/database');
     const q = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
     const snapshot = await get(q);
@@ -76,7 +80,7 @@ export class Scan2Page implements OnInit {
         .toLowerCase()
         .trim();
 
-      // ✅ Today only, allow pending/confirmed
+      // Today only, allow pending/confirmed
       if (
         data.date === today &&
         (status === 'pending' || status === 'confirmed')
@@ -87,9 +91,7 @@ export class Scan2Page implements OnInit {
     });
   }
 
-  /* -------------------------------
-   STEP 7.2 — START SCAN
-  --------------------------------*/
+  /* STEP 7.2 — START SCAN */
   async startScan() {
     if (!this.hasValidAppointment || !this.todayAppointment?.id) {
       await this.main.showToast(
@@ -116,47 +118,118 @@ export class Scan2Page implements OnInit {
 
       // Start scanning
       BarcodeScanner.hideBackground();
-      document.body.classList.add('scanner-active');
+      document.querySelector('body')?.classList.add('scanner-active');
+      this.content_visibility = 'hidden';
 
       const result = await BarcodeScanner.startScan();
 
       // Stop UI overlay
       BarcodeScanner.showBackground();
-      document.body.classList.remove('scanner-active');
+      document.querySelector('body')?.classList.remove('scanner-active');
+      this.content_visibility = '';
 
       if (!result?.hasContent) {
         await this.main.showToast('Scan cancelled.', 'medium');
         return;
       }
 
-      const raw = String(result.content).trim();
-      const type = this.parseQueueTypeFromQR(raw);
+      const qrText = result.content ?? '';
 
-      if (!type) {
-        await this.main.showToast(
-          'Invalid QR code. Please scan the correct clinic QR.',
-          'danger',
-          'close-circle-outline',
-          'top',
-        );
-        return;
-      }
-
-      this.scannedType = type;
-
-      await this.generateQueueNumberFCFS(type);
+      console.log('QR Text: ', qrText);
+      this.handleQRResult(qrText);
     } catch (e) {
       console.error(e);
+      this.stopScan();
       await this.main.showToast('Scan failed. Please try again.', 'danger');
     } finally {
-      this.isScanning = false;
-      // Always stop scanning safely
-      try {
-        await BarcodeScanner.stopScan();
-      } catch {}
+      await BarcodeScanner.stopScan();
       BarcodeScanner.showBackground();
-      document.body.classList.remove('scanner-active');
+      document.querySelector('body')?.classList.remove('scanner-active');
+      this.content_visibility = '';
+      this.isScanning = false;
     }
+  }
+
+  stopScan() {
+    BarcodeScanner.showBackground();
+    BarcodeScanner.stopScan();
+    document.querySelector('body')?.classList.remove('scanner-active');
+    this.content_visibility = '';
+    this.isScanning = false;
+  }
+
+  ngOnDestroy(): void {
+    this.stopScan();
+  }
+
+  async handleQRResult(qrText: string) {
+    const prefix = 'MYQUEUE:TREATMENT=';
+
+    // Validate format
+    if (!qrText || !qrText.startsWith(prefix)) {
+      await this.main.showToast(
+        'Invalid clinic QR code',
+        'danger',
+        'close-circle-outline',
+        'top',
+      );
+      return;
+    }
+
+    // Extract & normalize treatment
+    const treatmentType = (qrText.substring(prefix.length) || '')
+      .trim()
+      .toLowerCase();
+
+    if (!treatmentType) {
+      await this.main.showToast(
+        'Invalid clinic QR code',
+        'danger',
+        'close-circle-outline',
+        'top',
+      );
+      return;
+    }
+
+    // Normalize appointment type
+    const apptType = (this.todayAppointment?.appointmentType || '')
+      .trim()
+      .toLowerCase();
+
+    // map appointment names to qr codes if your appointmentType is long text
+    const mapApptToQr: Record<string, string> = {
+      'general treatment': 'general',
+      dental: 'dental',
+      maternal: 'maternal',
+      child: 'child',
+      vaccination: 'vaccination',
+      chronic: 'chronic',
+    };
+
+    const expectedQrType = mapApptToQr[apptType] || apptType;
+
+    // Compare
+    if (expectedQrType !== treatmentType) {
+      await this.main.showToast(
+        `Wrong counter QR. Please scan the correct clinic QR.`,
+        'danger',
+        'alert-circle-outline',
+        'top',
+      );
+      return;
+    }
+
+    // Success
+    localStorage.setItem('queueTreatment', treatmentType);
+
+    await this.main.showToast(
+      `Checked in for ${treatmentType} clinic`,
+      'success',
+      'checkmark-circle-outline',
+      'top',
+    );
+
+    this.router.navigate(['/queue']);
   }
 
   /* FCFS QUEUE NUMBER GENERATION -*/
@@ -222,32 +295,5 @@ export class Scan2Page implements OnInit {
     } finally {
       this.isGenerating = false;
     }
-  }
-
-  parseQueueTypeFromQR(raw: string): string | null {
-    const val = raw.toUpperCase();
-
-    const allowed = [
-      'GENERAL',
-      'DENTAL',
-      'MATERNAL',
-      'CHILD',
-      'VACCINE',
-      'CHRONIC',
-    ];
-
-    if (allowed.includes(val)) return val;
-
-    if (val.startsWith('TYPE=')) {
-      const t = val.replace('TYPE=', '').trim();
-      if (allowed.includes(t)) return t;
-    }
-
-    return null;
-  }
-
-  private getUidSafe(): string | null {
-    const authUser = getAuth().currentUser;
-    return authUser?.uid || this.auth.getUID() || null;
   }
 }

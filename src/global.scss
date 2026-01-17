@@ -32,52 +32,52 @@ body.dark {
 }
 
 .login-help-alert .alert-message {
-  white-space: pre-line;   /* IMPORTANT: show \n line breaks */
+  white-space: pre-line; /* IMPORTANT: show \n line breaks */
   text-align: left;
   line-height: 1.6;
 }
 
 .appointment-detail-alert {
-	.alert-wrapper {
-        --max-width: 500px;
+  .alert-wrapper {
+    --max-width: 500px;
+  }
+
+  .detail-content {
+    padding: 1rem 0;
+  }
+
+  .detail-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+
+    strong {
+      display: block;
+      font-size: 11px;
+      color: #5a6c7d;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 0.5rem;
     }
 
-    .detail-content {
-        padding: 1rem 0;
+    p {
+      font-size: 14px;
+      color: #2c3e50;
+      margin: 0;
+      line-height: 1.5;
+      font-weight: 600;
+
+      &.sub {
+        font-size: 13px;
+        color: #5a6c7d;
+        margin-top: 0.35rem;
+        font-weight: 500;
+      }
     }
-
-    .detail-item {
-        margin: 1rem 0;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 12px;
-        border-left: 4px solid #667eea;
-
-        strong {
-            display: block;
-            font-size: 11px;
-            color: #5a6c7d;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 0.5rem;
-        }
-
-        p {
-            font-size: 14px;
-            color: #2c3e50;
-            margin: 0;
-            line-height: 1.5;
-            font-weight: 600;
-
-            &.sub {
-                font-size: 13px;
-                color: #5a6c7d;
-                margin-top: 0.35rem;
-                font-weight: 500;
-            }
-        }
-    }
+  }
 }
 
 /* Cancel button in grey */
@@ -87,7 +87,12 @@ body.dark {
 }
 
 /* Confirm button in red */
-.alert-confirm-btn {  
+.alert-confirm-btn {
   color: var(--ion-color-danger) !important;
   font-weight: 600;
+}
+
+body.scanner-active {
+  --background: transparent;
+  --ion-background-color: transparent;
 }

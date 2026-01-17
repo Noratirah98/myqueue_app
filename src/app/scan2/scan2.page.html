@@ -4,7 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="page">
+<ion-content class="page" [style.visibility]="content_visibility">
 
   <!-- Appointment required -->
   <div class="card" *ngIf="!hasValidAppointment">
@@ -62,3 +62,12 @@
   </div>
 
 </ion-content>
+
+
+<ion-footer *ngIf="isScanning" class="ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" (click)="stopScan()" class="close-button">
+      Stop Scan
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
