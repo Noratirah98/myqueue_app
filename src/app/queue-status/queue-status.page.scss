@@ -136,7 +136,6 @@ ion-header.modern-header {
     &::before {
       content: "";
       position: absolute;
-      inset: -100%;
       background: radial-gradient(
         circle,
         rgba(16, 185, 129, 0.2) 0%,
@@ -286,7 +285,6 @@ ion-header.modern-header {
   &::before {
     content: "";
     position: absolute;
-    inset: 0;
     background: linear-gradient(
       0deg,
       transparent 0%,
