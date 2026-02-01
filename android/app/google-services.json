@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "376325326776",
+    "firebase_url": "https://myqueue-8588b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "myqueue-8588b",
+    "storage_bucket": "myqueue-8588b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376325326776:android:efa36e511cc8ed0d75714d",
+        "android_client_info": {
+          "package_name": "com.myqueue.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtC9XUFVxH__uH7uy3B95FIB9qs0alDBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376325326776:android:18b9fdee2f3a65aa75714d",
+        "android_client_info": {
+          "package_name": "io.ionic.starter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtC9XUFVxH__uH7uy3B95FIB9qs0alDBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

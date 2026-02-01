@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'MyQueue',
+  appId: 'com.myqueue.app',
+  appName: 'MyQueue Clinic',
   webDir: 'www',
   server: {
     androidScheme: 'https',
