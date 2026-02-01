@@ -1,11 +1,24 @@
-import { Component, ElementRef, OnInit, QueryList, ViewChildren } from '@angular/core';
-import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
+import {
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  LoadingController,
+  ToastController,
+} from '@ionic/angular';
 import { MainService } from '../services/main.service';
 import { get, getDatabase, ref } from 'firebase/database';
 import { StorageService } from '../services/storage.service';
-
 
 @Component({
   selector: 'app-login',
@@ -14,10 +27,10 @@ import { StorageService } from '../services/storage.service';
 })
 export class LoginPage implements OnInit {
   @ViewChildren('codeInput') codeInputs!: QueryList<ElementRef>;
-  
+
   loginData = {
     email: '',
-    password: ''
+    password: '',
   };
 
   showPassword = false;
@@ -32,7 +45,6 @@ export class LoginPage implements OnInit {
     private main: MainService,
     private storage: StorageService,
     private alertController: AlertController,
-    private toastController: ToastController,
     private loadingController: LoadingController,
   ) {}
 
@@ -67,17 +79,19 @@ export class LoginPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingController.create({ message: 'Logging in...' });
+    const loading = await this.loadingController.create({
+      message: 'Logging in...',
+    });
     await loading.present();
 
     try {
-      const auth  = getAuth();
+      const auth = getAuth();
       const email = this.loginData.email.trim();
 
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        this.loginData.password
+        this.loginData.password,
       );
 
       const uid = userCredential.user.uid;
@@ -87,17 +101,16 @@ export class LoginPage implements OnInit {
 
       // Try load patient profile
       try {
-        const db          = getDatabase();
+        const db = getDatabase();
         const patientSnap = await get(ref(db, `patients/${uid}`));
-        const patient     = patientSnap.exists() ? patientSnap.val() : null;
-        const patientName = patient?.username ?? 'Patient';
+        const patient = patientSnap.exists() ? patientSnap.val() : null;
+        const patientName = patient?.userName ?? 'Patient';
 
         await this.storage.set('patientName', patientName);
-
       } catch (error: any) {
-        console.log("LOGIN ERROR FULL:", error);
-        console.log("CODE:", error?.code);
-        console.log("MESSAGE:", error?.message);
+        console.log('LOGIN ERROR FULL:', error);
+        console.log('CODE:', error?.code);
+        console.log('MESSAGE:', error?.message);
         await loading.dismiss();
         this.handleFirebaseLoginError(error);
       }
@@ -110,7 +123,11 @@ export class LoginPage implements OnInit {
       }
 
       await loading.dismiss();
-      await this.main.showToast('Login successfully', 'success', 'checkmark-done-circle');
+      await this.main.showToast(
+        'Login successfully',
+        'success',
+        'checkmark-done-circle',
+      );
 
       this.router.navigateByUrl('/home');
     } catch (authErr: any) {
@@ -127,9 +144,10 @@ export class LoginPage implements OnInit {
       case 'auth/invalid-credential':
         message = 'Incorrect email or password.';
         break;
-        
+
       case 'auth/user-not-found':
-        message = 'This email is not registered in our system. Please visit the clinic counter to register or update your account during your first visit.';
+        message =
+          'This email is not registered in our system. Please visit the clinic counter to register or update your account during your first visit.';
         break;
 
       case 'auth/wrong-password':
@@ -166,8 +184,7 @@ export class LoginPage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Login Help',
       cssClass: 'login-help-alert',
-      message:
-          `No Account?
+      message: `No Account?
           Your account will be created by clinic staff during your first visit.
 
           Forgot Password?
@@ -179,7 +196,7 @@ export class LoginPage implements OnInit {
           <p><strong>Support:</strong></p>
           <p>Email: support@myqueue.com<br>
           Phone: 1-800-MY-QUEUE</p>`,
-      buttons: ['Close']
+      buttons: ['Close'],
     });
 
     await alert.present();
@@ -199,7 +216,12 @@ export class LoginPage implements OnInit {
     const email = (this.resetEmail || '').trim();
 
     if (!email || !this.isValidEmail(email)) {
-      await this.main.showToast('Please enter a valid email address', 'warning', 'alert-circle-outline', 'top');
+      await this.main.showToast(
+        'Please enter a valid email address',
+        'warning',
+        'alert-circle-outline',
+        'top',
+      );
       return;
     }
 
@@ -209,16 +231,22 @@ export class LoginPage implements OnInit {
       const auth = getAuth();
       await sendPasswordResetEmail(auth, email);
 
-      await this.main.showToast('Reset link sent. Please check your email.', 'success', 'mail-outline', 'top');
+      await this.main.showToast(
+        'Reset link sent. Please check your email.',
+        'success',
+        'mail-outline',
+        'top',
+      );
 
       // optional: auto close modal
       this.closeForgotPassword();
-
     } catch (error: any) {
       let msg = 'Failed to send reset email. Please try again.';
-      if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
+      if (error.code === 'auth/user-not-found')
+        msg = 'No account found with this email.';
       if (error.code === 'auth/invalid-email') msg = 'Invalid email format.';
-      if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
+      if (error.code === 'auth/too-many-requests')
+        msg = 'Too many attempts. Try again later.';
 
       await this.main.showToast(msg, 'danger', 'alert-circle-outline', 'top');
     } finally {

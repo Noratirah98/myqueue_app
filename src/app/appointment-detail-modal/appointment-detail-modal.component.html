@@ -13,7 +13,7 @@
   <div class="modal-content">
 
     <!-- Status Badge -->
-    <div *ngIf="appt.status==='cancelled'" class="status-badge" [attr.data-status]="appt.status">
+    <div class="status-badge" [attr.data-status]="appt.status">
       <ion-icon [name]="getStatusIcon(appt.status)"></ion-icon>
       <span>{{ getStatusText(appt.status) }}</span>
     </div>
@@ -44,6 +44,43 @@
       </div>
     </div>
 
+    <!-- Queue Info Card (if checked in or completed) -->
+    <div class="info-card queue-card" *ngIf="appt.queueNumberText">
+      <div class="card-icon">
+        <ion-icon name="ticket"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Queue Number</span>
+        <h2 class="queue-number">{{ appt.queueNumberText }}</h2>
+        <p class="sub-text" *ngIf="appt.checkInAt">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Checked in at {{ formatTime(appt.checkInAt) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Completed Info Card -->
+    <div class="info-card success-card" *ngIf="appt.status === 'completed' && appt.completedAt">
+      <div class="card-icon">
+        <ion-icon name="checkmark-done"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Service Completed</span>
+        <p class="main-text">{{ formatFullDateTime(appt.completedAt) }}</p>
+      </div>
+    </div>
+
+    <!-- Cancelled Info Card -->
+    <div class="info-card danger-card" *ngIf="appt.status === 'cancelled' && appt.cancelledAt">
+      <div class="card-icon">
+        <ion-icon name="close-circle"></ion-icon>
+      </div>
+      <div class="card-content">
+        <span class="label">Cancelled On</span>
+        <p class="main-text">{{ formatFullDateTime(appt.cancelledAt) }}</p>
+      </div>
+    </div>
+
     <!-- Symptoms Card -->
     <div class="info-card" *ngIf="appt.symptoms">
       <div class="card-icon">
@@ -66,7 +103,7 @@
       </div>
     </div>
 
-    <!-- Created Date (if available) -->
+    <!-- Created Date -->
     <div class="created-info" *ngIf="appt.createdAt">
       <ion-icon name="information-circle-outline"></ion-icon>
       <span>Booked on {{ formatCreatedDate(appt.createdAt) }}</span>

@@ -1,8 +1,31 @@
+// Animations
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+// Header
 ion-header {
   ion-toolbar {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: white;
-    
+
     ion-title {
       font-weight: 600;
       font-size: 18px;
@@ -14,6 +37,7 @@ ion-header {
   }
 }
 
+// Content
 ion-content {
   --background: #f5f7fa;
 }
@@ -42,9 +66,15 @@ ion-content {
     font-size: 20px;
   }
 
-  &[data-status="pending"] {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  &[data-status="confirmed"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+  }
+
+  &[data-status="checked_in"] {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    animation: pulse 2s ease-in-out infinite;
   }
 
   &[data-status="completed"] {
@@ -72,7 +102,7 @@ ion-content {
   overflow: hidden;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 0;
@@ -175,6 +205,94 @@ ion-content {
   }
 }
 
+// Queue Card
+.queue-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 4px solid #10b981 !important;
+
+  &::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  }
+
+  .card-icon {
+    background: rgba(16, 185, 129, 0.2);
+
+    ion-icon {
+      color: #10b981;
+    }
+  }
+
+  .queue-number {
+    font-size: 32px !important;
+    color: #10b981 !important;
+    font-weight: 900 !important;
+    letter-spacing: 2px;
+    margin: 8px 0 !important;
+  }
+
+  .sub-text {
+    color: #059669 !important;
+  }
+}
+
+// Success Card (Completed)
+.success-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-left: 4px solid #10b981 !important;
+
+  &::before {
+    background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+  }
+
+  .card-icon {
+    background: rgba(16, 185, 129, 0.2);
+
+    ion-icon {
+      color: #10b981;
+    }
+  }
+
+  .card-content {
+    .label {
+      color: #059669;
+    }
+
+    .main-text {
+      color: #059669;
+      font-weight: 700;
+    }
+  }
+}
+
+// Danger Card (Cancelled)
+.danger-card {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-left: 4px solid #dc2626 !important;
+
+  &::before {
+    background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+  }
+
+  .card-icon {
+    background: rgba(220, 38, 38, 0.2);
+
+    ion-icon {
+      color: #dc2626;
+    }
+  }
+
+  .card-content {
+    .label {
+      color: #b91c1c;
+    }
+
+    .main-text {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+  }
+}
+
 // Created Info
 .created-info {
   display: flex;
@@ -234,6 +352,10 @@ ion-footer {
 
       .main-text {
         font-size: 14px;
+      }
+
+      .queue-number {
+        font-size: 28px !important;
       }
     }
   }

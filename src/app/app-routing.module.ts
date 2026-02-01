@@ -10,7 +10,8 @@ const routes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
+    loadChildren: () =>
+      import('./login/login.module').then((m) => m.LoginPageModule),
   },
   {
     path: 'folder/:id',
@@ -21,65 +22,52 @@ const routes: Routes = [
   {
     path: 'home',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
-  },
-  {
-    path: 'qr-scanner2',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./qr-scanner2/qr-scanner2.module').then( m => m.QrScanner2PageModule)
+    loadChildren: () =>
+      import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
     path: 'notification2',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./notification2/notification2.module').then( m => m.Notification2PageModule)
+    loadChildren: () =>
+      import('./notification2/notification2.module').then(
+        (m) => m.Notification2PageModule,
+      ),
   },
   {
     path: 'profile2',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./profile2/profile2.module').then( m => m.Profile2PageModule)
-  },
-  {
-    path: 'queue-status2',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./queue-status2/queue-status2.module').then( m => m.QueueStatus2PageModule)
+    loadChildren: () =>
+      import('./profile2/profile2.module').then((m) => m.Profile2PageModule),
   },
   {
     path: 'appointment',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./appointment/appointment.module').then( m => m.AppointmentPageModule)
-  },
-  {
-    path: 'qr-scanner',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./qr-scanner/qr-scanner.module').then( m => m.QrScannerPageModule)
+    loadChildren: () =>
+      import('./appointment/appointment.module').then(
+        (m) => m.AppointmentPageModule,
+      ),
   },
   {
     path: 'queue-status',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./queue-status/queue-status.module').then( m => m.QueueStatusPageModule)
+    loadChildren: () =>
+      import('./queue-status/queue-status.module').then(
+        (m) => m.QueueStatusPageModule,
+      ),
   },
   {
     path: 'appointment-list',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./appointment-list/appointment-list.module').then( m => m.AppointmentListPageModule)
-  },
-  {
-    path: 'qr-scanner3',
-    canActivate: [AuthGuard],
-    loadChildren: () => import('./qr-scanner3/qr-scanner3.module').then( m => m.QrScanner3PageModule)
+    loadChildren: () =>
+      import('./appointment-list/appointment-list.module').then(
+        (m) => m.AppointmentListPageModule,
+      ),
   },
   {
     path: 'scan',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./scan/scan.module').then( m => m.ScanPageModule)
-  },
-  {
-    path: 'queue',
-    loadChildren: () => import('./queue/queue.module').then( m => m.QueuePageModule)
-  },
-  {
-    path: 'scan2',
-    loadChildren: () => import('./scan2/scan2.module').then( m => m.Scan2PageModule)
+    loadChildren: () =>
+      import('./scan/scan.module').then((m) => m.ScanPageModule),
   },
 ];
 

@@ -26,7 +26,7 @@
 
     <!-- Greeting Section -->
     <div class="greeting-section">
-      <div class="greeting-card">
+      <div class="greeting-card-gradient">
         <div class="greeting-content">
           <h4 class="greeting-title">
             <span class="wave-emoji">👋</span>
@@ -40,11 +40,11 @@
       </div>
     </div>
 
-    <!-- STATE A: NO ACTIVE QUEUE -->
-    <div *ngIf="!hasActiveQueue" class="no-queue-state">
+    <!-- ============================================ STATE A: NO ACTIVE QUEUE ============================================ -->
+    <div *ngIf="!hasActiveQueue">
 
-      <!-- Main Action Buttons -->
-      <div class="action-cards">
+      <!-- Quick Action: Book Appointment -->
+      <div class="quick-book-section">
         <ion-card class="action-card primary-action" (click)="bookAppointment()">
           <div class="card-glow"></div>
           <ion-card-content>
@@ -53,87 +53,7 @@
             </div>
             <div class="card-text">
               <h2>Book Appointment</h2>
-              <p>Schedule your appointment now</p>
-            </div>
-            <div class="card-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card secondary-action" (click)="scanQRCode2()">
-          <div class="card-glow"></div>
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="qr-code-outline"></ion-icon>
-            </div>
-            <div class="card-text">
-              <h2>Scan QR Code 1</h2>
-              <p>Check in for your visit</p>
-            </div>
-            <div class="card-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card secondary-action" (click)="scanQRCode3()">
-          <div class="card-glow"></div>
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="qr-code-outline"></ion-icon>
-            </div>
-            <div class="card-text">
-              <h2>Scan QR Code</h2>
-              <p>Check in for your visit</p>
-            </div>
-            <div class="card-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card secondary-action" (click)="scanQRCode4()">
-          <div class="card-glow"></div>
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="qr-code-outline"></ion-icon>
-            </div>
-            <div class="card-text">
-              <h2>Scan QR Code 3</h2>
-              <p>Check in for your visit</p>
-            </div>
-            <div class="card-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card secondary-action" (click)="scanQRCode5()">
-          <div class="card-glow"></div>
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="qr-code-outline"></ion-icon>
-            </div>
-            <div class="card-text">
-              <h2>Scan QR Code 4</h2>
-              <p>Check in for your visit</p>
-            </div>
-            <div class="card-arrow">
-              <ion-icon name="arrow-forward-outline"></ion-icon>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card class="action-card secondary-action" (click)="scanQRCode1()">
-          <div class="card-glow"></div>
-          <ion-card-content>
-            <div class="card-icon-wrapper">
-              <ion-icon name="qr-code-outline"></ion-icon>
-            </div>
-            <div class="card-text">
-              <h2>Scan QR Code 5</h2>
-              <p>Check in for your visit</p>
+              <p>Schedule your clinic visit</p>
             </div>
             <div class="card-arrow">
               <ion-icon name="arrow-forward-outline"></ion-icon>
@@ -142,69 +62,238 @@
         </ion-card>
       </div>
 
-      <!-- Upcoming Appointment (Nearest Only) -->
-      <div class="appointments-section">
+      <!-- ============================================ APPOINTMENT JOURNEY CARDS ============================================ -->
 
+      <!-- Loading State -->
+      <div *ngIf="loadingAppointment" class="appointment-loading">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Loading your appointments...</p>
+      </div>
+
+      <!-- Case 1: TODAY'S APPOINTMENT - NOT CHECKED IN -->
+      <div
+        *ngIf="!loadingAppointment && nextAppointment && isToday(nextAppointment.date) && !isCheckedIn(nextAppointment)">
         <div class="section-header">
           <div class="section-title">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <h3>Next Appointment</h3>
+            <ion-icon name="alert-circle" color="danger"></ion-icon>
+            <h3>Action Required</h3>
           </div>
-
           <ion-button fill="clear" size="small" class="view-all-btn" (click)="viewAppointments()">
             View All
             <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-button>
         </div>
 
-        <!-- Loading State -->
-        <div *ngIf="loadingAppointment" class="appointment-loading">
-          <ion-spinner name="crescent"></ion-spinner>
-          <p>Loading appointment...</p>
-        </div>
+        <ion-card class="urgent-appointment-card">
+          <div class="urgent-badge">
+            <ion-icon name="alarm"></ion-icon>
+            <span>TODAY'S APPOINTMENT</span>
+          </div>
 
-        <!-- Appointment Card -->
-        <ion-card *ngIf="!loadingAppointment && nextAppointment" class="appointment-card single">
-          <!-- Countdown Badge -->
-          <ion-badge class="countdown-badge" [color]="getCountdownColor(nextAppointment.date)">
-            {{ getCountdownText(nextAppointment.date) }}
-          </ion-badge>
           <ion-card-content>
-            <div class="appointment-header">
-              <div class="appointment-details">
-                <h4>{{ nextAppointment.appointmentType }}</h4>
+            <div class="appointment-main-info">
+              <!-- <div class="clinic-icon-large">
+                {{ getClinicIcon(nextAppointment.appointmentType) }}
+              </div> -->
+              <div class="appointment-details-large">
+                <h2>{{ nextAppointment.appointmentType }}</h2>
+                <div class="time-info-large">
+                  <ion-icon name="time"></ion-icon>
+                  <span>{{ nextAppointment.time }}</span>
+                </div>
               </div>
             </div>
-            <div class="appointment-info">
-              <div class="info-row">
-                <ion-icon name="calendar-outline"></ion-icon>
-                <span>{{ formatDate(nextAppointment.date) }}</span>
+
+            <div class="journey-instructions">
+              <div class="instruction-title">
+                <ion-icon name="information-circle"></ion-icon>
+                <span>What to do:</span>
               </div>
-              <div class="info-row">
-                <ion-icon name="time-outline"></ion-icon>
-                <span>{{ nextAppointment.time }}</span>
-              </div>
+              <ol class="instruction-list">
+                <li>✅ Appointment confirmed</li>
+                <li>👉 <strong>Arrive at clinic and tap "Check-In"</strong></li>
+                <li>📷 Scan QR code at counter {{ getCounterLetter(nextAppointment.appointmentType) }}</li>
+                <li>🎫 Get your queue number</li>
+                <li>⏰ Wait for your turn (we'll notify you)</li>
+              </ol>
+            </div>
+
+            <!-- BIG CHECK-IN BUTTON -->
+            <ion-button expand="block" size="large" color="success" class="checkin-btn" (click)="scanQRCode()">
+              <ion-icon name="qr-code" slot="start"></ion-icon>
+              CHECK-IN NOW
+            </ion-button>
+
+            <div class="secondary-actions">
+              <ion-button fill="clear" size="small" (click)="viewAppointmentDetails(nextAppointment)">
+                <ion-icon name="information-circle" slot="start"></ion-icon>
+                View Details
+              </ion-button>
+              <ion-button fill="clear" size="small" color="danger" (click)="cancelAppointment(nextAppointment)">
+                <ion-icon name="close-circle" slot="start"></ion-icon>
+                Cancel
+              </ion-button>
             </div>
           </ion-card-content>
         </ion-card>
+      </div>
 
-        <!-- Empty State -->
-        <div *ngIf="!loadingAppointment && !nextAppointment" class="empty-state">
-          <div class="empty-icon-wrapper">
-            <ion-icon name="calendar-outline"></ion-icon>
+      <!-- Case 2: FUTURE APPOINTMENT (Not Today) -->
+      <div *ngIf="!loadingAppointment && nextAppointment && !isToday(nextAppointment.date)">
+        <div class="section-header">
+          <div class="section-title">
+            <ion-icon name="calendar"></ion-icon>
+            <h3>Upcoming Appointment</h3>
           </div>
-          <h3>No Upcoming Appointment</h3>
-          <p>You don’t have any upcoming appointments.</p>
-          <ion-button expand="block" (click)="bookAppointment()">
-            <ion-icon name="add-outline" slot="start"></ion-icon>
-            Book Appointment
+          <ion-button fill="clear" size="small" class="view-all-btn" (click)="viewAppointments()">
+            View All
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
           </ion-button>
         </div>
 
+        <ion-card class="future-appointment-card">
+          <ion-badge class="countdown-badge" [color]="getCountdownColor(nextAppointment.date)">
+            {{ getCountdownText(nextAppointment.date) }}
+          </ion-badge>
+
+          <ion-card-content>
+            <div class="appointment-summary">
+              <!-- <div class="clinic-icon-medium">
+                {{ getClinicIcon(nextAppointment.appointmentType) }}
+              </div> -->
+              <div class="appointment-info-medium">
+                <h3>{{ nextAppointment.appointmentType }}</h3>
+                <div class="date-time-row">
+                  <div class="info-item">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    <span>{{ formatDate(nextAppointment.date) }}</span>
+                  </div>
+                  <div class="info-item">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <span>{{ nextAppointment.time }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Journey Progress Steps -->
+            <div class="journey-steps">
+              <div class="step-title">Your Journey:</div>
+
+              <div class="step completed">
+                <div class="step-indicator">
+                  <ion-icon name="checkmark-circle"></ion-icon>
+                </div>
+                <div class="step-content">
+                  <div class="step-label">Appointment Booked</div>
+                  <div class="step-sublabel">Confirmed</div>
+                </div>
+              </div>
+
+              <div class="step-connector"></div>
+
+              <div class="step confirmed">
+                <div class="step-indicator">
+                  <ion-icon name="time"></ion-icon>
+                </div>
+                <div class="step-content">
+                  <div class="step-label">Check-In</div>
+                  <div class="step-sublabel">On {{ formatShortDate(nextAppointment.date) }}</div>
+                </div>
+              </div>
+
+              <div class="step-connector locked"></div>
+
+              <div class="step locked">
+                <div class="step-indicator">
+                  <ion-icon name="lock-closed"></ion-icon>
+                </div>
+                <div class="step-content">
+                  <div class="step-label">Get Queue Number</div>
+                  <div class="step-sublabel">After check-in</div>
+                </div>
+              </div>
+
+              <div class="step-connector locked"></div>
+
+              <div class="step locked">
+                <div class="step-indicator">
+                  <ion-icon name="lock-closed"></ion-icon>
+                </div>
+                <div class="step-content">
+                  <div class="step-label">Wait for Turn</div>
+                  <div class="step-sublabel">We'll notify you</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-note">
+              <ion-icon name="information-circle"></ion-icon>
+              <p>Arrive 10-15 minutes early. Tap <strong>"Check-In"</strong> button on appointment day to scan QR code.
+              </p>
+            </div>
+
+            <div class="appointment-actions">
+              <ion-button fill="outline" expand="block" (click)="viewAppointmentDetails(nextAppointment)">
+                <ion-icon name="eye" slot="start"></ion-icon>
+                View Details
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
       </div>
+
+      <!-- Case 3: NO APPOINTMENT -->
+      <div *ngIf="!loadingAppointment && !nextAppointment" class="no-appointment-section">
+        <div class="section-header">
+          <div class="section-title">
+            <ion-icon name="calendar"></ion-icon>
+            <h3>Appointments</h3>
+          </div>
+          <ion-button fill="clear" size="small" class="view-all-btn" (click)="viewAppointments()">
+            View All
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+
+        <div class="empty-state">
+          <div class="empty-icon-wrapper">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <h3>No Upcoming Appointments</h3>
+          <p>You don't have any scheduled appointments. Book one now to get started!</p>
+
+          <!-- How It Works Section -->
+          <div class="how-it-works">
+            <h4>How MyQueue Works:</h4>
+            <div class="steps-mini">
+              <div class="mini-step">
+                <span class="mini-number">1</span>
+                <span class="mini-text">Book appointment</span>
+              </div>
+              <ion-icon name="arrow-forward" class="mini-arrow"></ion-icon>
+              <div class="mini-step">
+                <span class="mini-number">2</span>
+                <span class="mini-text">Check-in via QR</span>
+              </div>
+              <ion-icon name="arrow-forward" class="mini-arrow"></ion-icon>
+              <div class="mini-step">
+                <span class="mini-number">3</span>
+                <span class="mini-text">Track your queue</span>
+              </div>
+            </div>
+          </div>
+
+          <ion-button expand="block" size="large" (click)="bookAppointment()" class="cta-button">
+            <ion-icon name="calendar" slot="start"></ion-icon>
+            Book Appointment
+          </ion-button>
+        </div>
+      </div>
+
     </div>
 
-    <!-- STATE B: HAS ACTIVE QUEUE -->
+    <!-- ============================================ STATE B: HAS ACTIVE QUEUE (Already Checked In) ============================================ -->
     <div *ngIf="hasActiveQueue" class="active-queue-state">
 
       <ion-card class="queue-status-card">
@@ -263,10 +352,16 @@
               </div>
               <div class="info-text">
                 <p class="info-value">~{{ estimatedWaitTime }} min</p>
-                <p class="info-label">Estimated wait time</p>
+                <p class="info-label">Estimated wait</p>
               </div>
             </div>
           </div>
+
+          <!-- View Full Queue Status Button -->
+          <ion-button expand="block" fill="solid" class="view-queue-btn" (click)="viewFullQueueStatus()">
+            <ion-icon name="list" slot="start"></ion-icon>
+            View Full Queue Status
+          </ion-button>
 
         </ion-card-content>
       </ion-card>
@@ -282,9 +377,9 @@
             Book New Appointment
           </ion-button>
 
-          <ion-button expand="block" fill="clear" class="quick-action-btn secondary" (click)="viewAppointments()">
+          <ion-button expand="block" fill="clear" class="quick-action-btn btn-secondary" (click)="viewAppointments()">
             <ion-icon slot="start" name="list-outline"></ion-icon>
-            View Appointments
+            View All Appointments
           </ion-button>
         </div>
       </div>
@@ -292,8 +387,8 @@
     </div>
 
     <!-- Logout Confirmation Modal -->
-    <div class="logout-overlay" *ngIf="showLogoutConfirm">
-      <div class="logout-modal">
+    <div class="logout-overlay" *ngIf="showLogoutConfirm" (click)="showLogoutConfirm = false">
+      <div class="logout-modal" (click)="$event.stopPropagation()">
 
         <div class="logout-icon-wrapper">
           <div class="logout-icon">

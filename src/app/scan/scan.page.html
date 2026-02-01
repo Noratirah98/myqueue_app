@@ -1,49 +1,162 @@
-<!-- <ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
-      <ion-button (click)="main.navigateBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-    <ion-title>QR Check-In</ion-title>
-  </ion-toolbar>
-</ion-header> -->
 <ion-header [translucent]="true" class="modern-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="main.navigateBack()">
+      <ion-button color="light" (click)="goBack()">
         <ion-icon name="arrow-back-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>
-      <span>Check-In</span>
-    </ion-title>
+    <ion-title>Check In</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="scan-content" [style.visibility]="content_visibility">
 
-  <!-- VALID APPOINTMENT -->
-  <div *ngIf="hasValidAppointment" class="valid-box">
-    <ion-icon name="checkmark-circle-outline"></ion-icon>
-    <h2>Appointment Found</h2>
-    <p>{{ todayAppointment.appointmentType }}</p>
-    <p>{{ todayAppointment.date }} | {{ todayAppointment.time }}</p>
-
-    <ion-button expand="block" (click)="startScan()">
-      Scan QR Code
-    </ion-button>
+  <!-- No Appointment State -->
+  <div class="container" *ngIf="!hasValidAppointment">
+    <div class="empty-state">
+      <div class="empty-icon">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <h2>No Appointment Today</h2>
+      <p>You need a valid appointment for today to check in</p>
+      <ion-button expand="block" class="primary-btn" routerLink="/appointment">
+        <ion-icon name="calendar" slot="start"></ion-icon>
+        Book Appointment
+      </ion-button>
+      <ion-button expand="block" fill="outline" class="outline-btn" routerLink="/appointment-list">
+        View My Appointments
+      </ion-button>
+    </div>
   </div>
 
-  <!-- NO APPOINTMENT -->
-  <div *ngIf="!hasValidAppointment" class="invalid-box">
-    <ion-icon name="alert-circle-outline"></ion-icon>
-    <h2>No Appointment Today</h2>
-    <p>You can only check in on the day of your appointment.</p>
+  <!-- Valid Appointment State -->
+  <div class="container" *ngIf="hasValidAppointment">
 
-    <ion-button expand="block" fill="outline" routerLink="/appointment-list">
-      View Appointments
+    <!-- Appointment Card -->
+    <div class="appointment-card">
+      <div class="card-header">
+        <div>
+          <h2>Ready to Check In</h2>
+          <p>Scan QR code at clinic counter</p>
+        </div>
+        <ion-badge color="success">TODAY</ion-badge>
+      </div>
+
+      <div class="details">
+        <div class="detail-item">
+          <div class="detail-icon">
+            <ion-icon name="medical"></ion-icon>
+          </div>
+          <div>
+            <span class="label">Type</span>
+            <span class="value">{{ todayAppointment?.appointmentType }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon">
+            <ion-icon name="time"></ion-icon>
+          </div>
+          <div>
+            <span class="label">Time</span>
+            <span class="value">{{ todayAppointment?.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <div class="instructions-header">
+        <ion-icon name="information-circle"></ion-icon>
+        <span>How to Check In</span>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <span class="step-title">Go to counter {{ getCounterLetter() }}</span>
+            <span class="step-desc">Locate your clinic counter</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <span class="step-title">Tap "Scan QR Code"</span>
+            <span class="step-desc">Press the button below</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <span class="step-title">Point at QR code</span>
+            <span class="step-desc">Align camera with code</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <span class="step-title">Get queue number</span>
+            <span class="step-desc">Wait for confirmation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Button -->
+    <ion-button expand="block" class="scan-btn" [disabled]="isScanning || isGenerating" (click)="startScan()">
+      <ion-spinner *ngIf="isScanning || isGenerating"></ion-spinner>
+      <ion-icon *ngIf="!(isScanning || isGenerating)" name="qr-code"></ion-icon>
+      <span>{{ getScanButtonText() }}</span>
     </ion-button>
+
+    <!-- Success Card -->
+    <div class="success-card" *ngIf="generatedQueueNumber">
+      <div class="success-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      <h3>Check-In Successful!</h3>
+      <p class="queue-label">Your Queue Number</p>
+      <div class="queue-number">{{ generatedQueueNumber }}</div>
+      <ion-chip color="primary">
+        <ion-icon name="medical"></ion-icon>
+        <ion-label>{{ getClinicName(scannedType) }}</ion-label>
+      </ion-chip>
+      <p class="message">Please wait for your turn. We'll notify you.</p>
+      <ion-button expand="block" class="view-btn" routerLink="/queue-status">
+        <ion-icon name="eye" slot="start"></ion-icon>
+        View Queue Status
+      </ion-button>
+    </div>
+
   </div>
 
 </ion-content>
+
+<!-- Scanning Overlay -->
+<div class="overlay scanning" *ngIf="isScanning && !isGenerating">
+  <div class="overlay-content">
+    <div class="scanner-frame">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="scan-line"></div>
+    </div>
+    <h3>Position QR Code</h3>
+    <p>Align within the frame</p>
+    <ion-button fill="solid" color="danger" (click)="stopScan()">
+      <ion-icon name="close" slot="start"></ion-icon>
+      Cancel
+    </ion-button>
+  </div>
+</div>
+
+<!-- Generating Overlay -->
+<div class="overlay generating" *ngIf="isGenerating">
+  <div class="overlay-content">
+    <ion-spinner color="light"></ion-spinner>
+    <h3>Generating Queue Number</h3>
+    <p>Please wait...</p>
+  </div>
+</div>

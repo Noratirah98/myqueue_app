@@ -1,63 +1,114 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>My Queue Status</ion-title>
+<ion-header [translucent]="true" class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button color="light" (click)="backHome()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Queue Status</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding queue-bg">
+<ion-content class="queue-content">
 
-  <!-- Your Queue Number -->
-  <ion-card class="queue-card highlight">
-    <ion-card-header>
-      <ion-item lines="none">
-        <ion-icon name="ticket-outline" slot="start"></ion-icon>
-        <ion-label>Your Queue Number</ion-label>
-      </ion-item>
-    </ion-card-header>
-    <ion-card-content>
-      <h1>{{ myQueueNumber }}</h1>
-    </ion-card-content>
-  </ion-card>
+  <!-- My Queue Card -->
+  <div class="my-queue-card" [class.pulsing-card]="status === 'serving'">
+    <div class="clinic-badge">
+      <ion-icon name="medical"></ion-icon>
+      <span>{{ myQueueType | titlecase }} Clinic</span>
+    </div>
 
-  <!-- Current Number Serving -->
-  <ion-card class="queue-card">
-    <ion-card-header>
-      <ion-item lines="none">
-        <ion-icon name="person-outline" slot="start"></ion-icon>
-        <ion-label>Current Number Being Served</ion-label>
-      </ion-item>
-    </ion-card-header>
-    <ion-card-content>
-      <h1>{{ currentNumber }}</h1>
-    </ion-card-content>
-  </ion-card>
+    <div class="queue-number-section">
+      <p class="label">Your Queue Number</p>
+      <div class="queue-number-display">
+        <h1 class="queue-number">{{ myQueueNumberText }}</h1>
+      </div>
+      <ion-badge [color]="getStatusColor()" class="status-badge">
+        {{ getStatusLabel() }}
+      </ion-badge>
+    </div>
 
-  <!-- People Ahead -->
-  <ion-card class="queue-card">
-    <ion-card-header>
-      <ion-item lines="none">
-        <ion-icon name="walk-outline" slot="start"></ion-icon>
-        <ion-label>People Ahead of You</ion-label>
-      </ion-item>
-    </ion-card-header>
-    <ion-card-content>
-      <h1>{{ peopleAhead }}</h1>
-    </ion-card-content>
-  </ion-card>
+    <div class="info-cards">
+      <div class="info-card">
+        <div class="info-icon">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="info-text">
+          <p class="info-value">{{ currentServingText }}</p>
+          <p class="info-label">Now Serving</p>
+        </div>
+      </div>
 
-  <!-- Status -->
-  <ion-card class="queue-card status-card">
-    <ion-card-header>
-      <ion-item lines="none">
-        <ion-icon name="pulse-outline" slot="start"></ion-icon>
-        <ion-label>Status</ion-label>
-      </ion-item>
-    </ion-card-header>
-    <ion-card-content>
-      <p class="status-badge" [ngClass]="status">
-        {{ status | titlecase }}
-      </p>
-    </ion-card-content>
-  </ion-card>
+      <div class="info-card">
+        <div class="info-icon">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <div class="info-text">
+          <p class="info-value">{{ peopleAhead }}</p>
+          <p class="info-label">Ahead of You</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="info-text">
+          <p class="info-value">~{{ estimatedWaitMinutes }} min</p>
+          <p class="info-label">Est. Wait</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TV-Style Queue Display -->
+  <div class="tv-display-section">
+    <div class="tv-header">
+      <div class="tv-title">
+        <ion-icon name="tv"></ion-icon>
+        <h3>Queue Display</h3>
+      </div>
+      <ion-button fill="clear" size="small" class="refresh-btn" (click)="refreshQueue()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="tv-screen">
+      <div class="tv-now-serving">
+        <span class="tv-label">NOW SERVING</span>
+        <div class="tv-big-number">{{ currentServingText }}</div>
+      </div>
+
+      <div class="tv-divider"></div>
+
+      <div class="tv-upcoming">
+        <span class="tv-label">NEXT IN QUEUE</span>
+        <div class="tv-queue-list">
+          <div *ngFor="let item of upcomingQueue" class="tv-queue-item" [class.is-you]="item.isYou"
+            [class.is-serving]="item.isServing">
+            <div class="tv-item-number">{{ item.numberText }}</div>
+            <div class="tv-item-status">
+              <ion-badge *ngIf="item.isYou" color="success">YOU</ion-badge>
+              <ion-badge *ngIf="item.isServing" color="primary">Serving</ion-badge>
+              <span *ngIf="!item.isYou && !item.isServing">Waiting</span>
+            </div>
+          </div>
+
+          <div *ngIf="upcomingQueue.length === 0" class="tv-empty">
+            <ion-icon name="hourglass-outline"></ion-icon>
+            <p>Waiting for queue...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <ion-button expand="block" fill="outline" class="home-btn" (click)="backHome()">
+      <ion-icon name="home" slot="start"></ion-icon>
+      Back to Home
+    </ion-button>
+  </div>
 
 </ion-content>

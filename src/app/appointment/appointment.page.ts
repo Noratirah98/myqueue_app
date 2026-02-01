@@ -1,9 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../services/auth.service';
-import { equalTo, get, getDatabase, onValue, orderByChild, push, query, ref, set } from 'firebase/database';
+import {
+  equalTo,
+  get,
+  getDatabase,
+  onValue,
+  orderByChild,
+  push,
+  query,
+  ref,
+  set,
+} from 'firebase/database';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AlertController, LoadingController, NavController, ToastController } from '@ionic/angular';
+import {
+  AlertController,
+  LoadingController,
+  NavController,
+  ToastController,
+} from '@ionic/angular';
 import { MainService } from '../services/main.service';
 
 interface TimeSlot {
@@ -24,48 +39,47 @@ interface AppointmentType {
   templateUrl: './appointment.page.html',
   styleUrls: ['./appointment.page.scss'],
 })
-
 export class AppointmentPage implements OnInit {
   currentStep = 1;
   appointmentForm: FormGroup;
 
   appointmentTypes: AppointmentType[] = [
-    { 
-      id: 'general', 
-      name: 'General Treatment', 
+    {
+      id: 'general',
+      name: 'General Treatment',
       icon: '🩺',
-      description: 'General health checkup' 
+      description: 'General health checkup',
     },
-    { 
-      id: 'dental', 
-      name: 'Dental', 
+    {
+      id: 'dental',
+      name: 'Dental',
       icon: '🦷',
-      description: 'Dental treatment and examination' 
+      description: 'Dental treatment and examination',
     },
-    { 
-      id: 'maternal', 
-      name: 'Maternal Health', 
+    {
+      id: 'maternal',
+      name: 'Maternal Health',
       icon: '🤰',
-      description: 'Pregnancy and postnatal care' 
+      description: 'Pregnancy and postnatal care',
     },
-    { 
-      id: 'child', 
-      name: 'Child Health', 
+    {
+      id: 'child',
+      name: 'Child Health',
       icon: '👶',
-      description: 'Child development checkup' 
+      description: 'Child development checkup',
     },
-    { 
-      id: 'vaccination', 
-      name: 'Vaccination', 
+    {
+      id: 'vaccination',
+      name: 'Vaccination',
       icon: '💉',
-      description: 'Immunization and vaccine shots' 
+      description: 'Immunization and vaccine shots',
     },
-    { 
-      id: 'chronic', 
-      name: 'Chronic Disease', 
+    {
+      id: 'chronic',
+      name: 'Chronic Disease',
       icon: '💊',
-      description: 'Chronic disease follow-up' 
-    }
+      description: 'Chronic disease follow-up',
+    },
   ];
 
   selectedType: AppointmentType | null = null;
@@ -94,7 +108,7 @@ export class AppointmentPage implements OnInit {
       date: ['', Validators.required],
       time: ['', Validators.required],
       symptoms: ['', Validators.maxLength(500)],
-      notes: ['', Validators.maxLength(500)]
+      notes: ['', Validators.maxLength(500)],
     });
   }
 
@@ -128,7 +142,7 @@ export class AppointmentPage implements OnInit {
   selectType(type: AppointmentType) {
     this.selectedType = type;
     this.appointmentForm.patchValue({ appointmentType: type.id });
-    
+
     // Animate transition
     setTimeout(() => {
       this.currentStep = 2;
@@ -140,7 +154,7 @@ export class AppointmentPage implements OnInit {
   previousDate() {
     const d = new Date(this.selectedDateObj);
     d.setDate(d.getDate() - 1);
-    
+
     if (this.isBlockedDate(d)) {
       this.main.showToast('This date is not available', 'warning');
       return;
@@ -154,14 +168,14 @@ export class AppointmentPage implements OnInit {
   nextDate() {
     const d = new Date(this.selectedDateObj);
     d.setDate(d.getDate() + 1);
-    
+
     // Check if exceeds max date
     const maxDateObj = new Date(this.maxDate);
     if (d > maxDateObj) {
       this.main.showToast('Cannot book more than 3 months ahead', 'warning');
       return;
     }
-    
+
     if (this.isBlockedDate(d)) {
       this.main.showToast('This date is not available', 'warning');
       return;
@@ -185,7 +199,7 @@ export class AppointmentPage implements OnInit {
 
   onCalendarSelected(value: string | string[] | null | undefined) {
     if (!value) return;
-    
+
     const dateStr = Array.isArray(value) ? value[0] : value;
     const date = new Date(dateStr);
 
@@ -212,9 +226,10 @@ export class AppointmentPage implements OnInit {
     const day = selectedDate.getDay();
 
     return (
-      selectedDate <= today ||   // block hari ini & sebelum
-      day === 0 || day === 6 ||   // block weekend
-      selectedDate > maxDateObj  // block lebih maxDate
+      selectedDate <= today || // block hari ini & sebelum
+      day === 0 ||
+      day === 6 || // block weekend
+      selectedDate > maxDateObj // block lebih maxDate
     );
   }
 
@@ -227,7 +242,7 @@ export class AppointmentPage implements OnInit {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
 
     // this.appointmentForm.patchValue({
@@ -235,41 +250,50 @@ export class AppointmentPage implements OnInit {
     // });
 
     this.appointmentForm.patchValue({
-      date: this.formatLocalDate(this.selectedDateObj)
+      date: this.formatLocalDate(this.selectedDateObj),
     });
   }
 
   getDateDay(): string {
-    return this.selectedDateObj.toLocaleDateString('en-US', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short'
-    }).toUpperCase();
+    return this.selectedDateObj
+      .toLocaleDateString('en-US', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      })
+      .toUpperCase();
   }
 
   loadTimeSlots() {
     // In production, fetch from backend based on date and type
     const morningSlots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
-    const afternoonSlots = ['14:00', '14:30', '15:00', '15:30', '16:00', '16:30'];
-    
+    const afternoonSlots = [
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+    ];
+
     const allSlots = [...morningSlots, ...afternoonSlots];
-    
-    this.timeSlots = allSlots.map(t => ({
+
+    this.timeSlots = allSlots.map((t) => ({
       time: t,
       display: this.formatTime(t),
-      available: Math.random() > 0.3 // Random availability for demo
+      available: Math.random() > 0.3, // Random availability for demo
     }));
   }
 
   getMorningSlots(): TimeSlot[] {
-    return this.timeSlots.filter(slot => {
+    return this.timeSlots.filter((slot) => {
       const hour = parseInt(slot.time.split(':')[0]);
       return hour < 12;
     });
   }
 
   getAfternoonSlots(): TimeSlot[] {
-    return this.timeSlots.filter(slot => {
+    return this.timeSlots.filter((slot) => {
       const hour = parseInt(slot.time.split(':')[0]);
       return hour >= 12;
     });
@@ -280,10 +304,10 @@ export class AppointmentPage implements OnInit {
       this.main.showToast('This time slot is full', 'warning');
       return;
     }
-    
+
     this.selectedSlot = slot;
     this.appointmentForm.patchValue({ time: slot.time });
-    
+
     // Animate transition
     setTimeout(() => {
       this.currentStep = 3;
@@ -293,22 +317,22 @@ export class AppointmentPage implements OnInit {
   /* ================= STEP 3: NOTES ================= */
   addSymptom(symptom: string) {
     const currentSymptoms = this.appointmentForm.get('symptoms')?.value || '';
-    
+
     // Check if symptom already exists
     if (currentSymptoms.includes(symptom)) {
       return;
     }
-    
-    const newSymptoms = currentSymptoms 
-      ? `${currentSymptoms}, ${symptom}` 
+
+    const newSymptoms = currentSymptoms
+      ? `${currentSymptoms}, ${symptom}`
       : symptom;
-    
+
     // Check character limit
     if (newSymptoms.length > 500) {
       this.main.showToast('Symptoms exceed 500 character limit', 'warning');
       return;
     }
-    
+
     this.appointmentForm.patchValue({ symptoms: newSymptoms });
   }
 
@@ -329,10 +353,9 @@ export class AppointmentPage implements OnInit {
         return;
       }
 
-      const selectedDate: string | null =
-        this.appointmentForm.value.date
-          ? this.formatLocalDate(this.appointmentForm.value.date)
-          : null;
+      const selectedDate: string | null = this.appointmentForm.value.date
+        ? this.formatLocalDate(this.appointmentForm.value.date)
+        : null;
 
       if (!selectedDate) {
         await this.main.showToast('Please select a date', 'danger');
@@ -357,7 +380,7 @@ export class AppointmentPage implements OnInit {
           'You already have an appointment on this date',
           'warning',
           'alert-circle-outline',
-          'top'
+          'top',
         );
         return;
       }
@@ -369,7 +392,7 @@ export class AppointmentPage implements OnInit {
         throw new Error('Patient profile not found');
       }
 
-      const patientName = patientSnap.val()?.name ?? 'Patient';
+      const patientName = patientSnap.val()?.fullName ?? 'Patient';
 
       const appointmentData = {
         uid,
@@ -379,11 +402,12 @@ export class AppointmentPage implements OnInit {
         time: this.selectedSlot.display,
         symptoms: this.appointmentForm.value.symptoms || '',
         notes: this.appointmentForm.value.notes || '',
-        status: 'pending' as const,
-        createdAt: new Date().toISOString()
+        status: 'confirmed' as const,
+        createdAt: new Date().toISOString(),
       };
 
       await push(ref(db, `appointments`), appointmentData);
+      this.showConfirm = false;
       await this.showSuccessAlert();
     } catch (error) {
       console.error('Error booking appointment:', error);
@@ -394,9 +418,10 @@ export class AppointmentPage implements OnInit {
   }
 
   formatLocalDate(dateInput: Date | string): string {
-    const d = typeof dateInput === 'string'
-      ? new Date(dateInput + 'T00:00:00') // FORCE LOCAL
-      : new Date(dateInput);
+    const d =
+      typeof dateInput === 'string'
+        ? new Date(dateInput + 'T00:00:00') // FORCE LOCAL
+        : new Date(dateInput);
 
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -406,21 +431,18 @@ export class AppointmentPage implements OnInit {
   }
 
   async hasAppointmentOnDate(uid: string, date: string): Promise<boolean> {
-    const db       = getDatabase();
-    const q        = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
+    const db = getDatabase();
+    const q = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
     const snapshot = await get(q);
 
     if (!snapshot.exists()) return false;
 
     let found = false;
 
-    snapshot.forEach(child => {
+    snapshot.forEach((child) => {
       const data = child.val();
 
-      if (
-        data.date === date &&
-        data.status !== 'cancelled'
-      ) {
+      if (data.date === date && data.status !== 'cancelled') {
         found = true;
       }
     });
@@ -431,18 +453,18 @@ export class AppointmentPage implements OnInit {
   async showSuccessAlert() {
     const alert = await this.alertController.create({
       header: '✅ Success!',
-      message: 'Your appointment has been successfully booked.You will receive a reminder notification 1 day before your appointment.',
+      message:
+        'Your appointment has been successfully booked.You will receive a reminder notification 1 day before your appointment.',
       buttons: [
         {
           text: 'OK',
           role: 'confirm',
           handler: () => {
-            this.showConfirm = false;
             this.navCtrl.navigateBack('/appointment-list');
-          }
-        }
+          },
+        },
       ],
-      cssClass: 'success-alert'
+      cssClass: 'success-alert',
     });
 
     await alert.present();
@@ -451,9 +473,10 @@ export class AppointmentPage implements OnInit {
   async showErrorAlert() {
     const alert = await this.alertController.create({
       header: '❌ Error',
-      message: 'Sorry, there was a problem making your appointment. Please try again.',
+      message:
+        'Sorry, there was a problem making your appointment. Please try again.',
       buttons: ['OK'],
-      cssClass: 'error-alert'
+      cssClass: 'error-alert',
     });
 
     await alert.present();
@@ -474,7 +497,7 @@ export class AppointmentPage implements OnInit {
     this.appointmentForm.reset();
     this.selectedType = null;
     this.selectedSlot = null;
-    
+
     // const today = new Date();
     // today.setHours(0, 0, 0, 0);
     const tomorrow = new Date();
@@ -495,6 +518,8 @@ export class AppointmentPage implements OnInit {
   }
 
   get canConfirm(): boolean {
-    return this.appointmentForm.valid && !!this.selectedType && !!this.selectedSlot;
+    return (
+      this.appointmentForm.valid && !!this.selectedType && !!this.selectedSlot
+    );
   }
 }

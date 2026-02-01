@@ -1,30 +1,47 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ActionSheetController, AlertController, LoadingController, ModalController } from '@ionic/angular';
-import { getDatabase, ref, get, set, query, orderByChild, equalTo } from "firebase/database";
-import { AuthService } from '../services/auth.service';
+import {
+  getDatabase,
+  ref,
+  get,
+  set,
+  update,
+  query,
+  orderByChild,
+  equalTo,
+} from 'firebase/database';
+import {
+  ModalController,
+  AlertController,
+  LoadingController,
+  ActionSheetController,
+} from '@ionic/angular';
 import { MainService } from '../services/main.service';
+import { AuthService } from '../services/auth.service';
 import { AppointmentDetailModalComponent } from '../appointment-detail-modal/appointment-detail-modal.component';
 
-// type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
-
 export type AppointmentStatus =
-  | 'pending'
   | 'confirmed'
+  | 'checked_in'
   | 'completed'
   | 'cancelled';
-
 
 export interface Appointment {
   id: string;
   uid: string;
-  appointmentType: string; 
-  date: string;            
-  time: string;          
+  appointmentType: string;
+  date: string;
+  time: string;
   status: AppointmentStatus;
   createdAt?: string;
   symptoms?: string;
   notes?: string;
+  // Queue-related fields
+  queueKey?: number;
+  queueNumberText?: string;
+  checkInAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
 }
 
 @Component({
@@ -32,7 +49,6 @@ export interface Appointment {
   templateUrl: './appointment-list.page.html',
   styleUrls: ['./appointment-list.page.scss'],
 })
-
 export class AppointmentListPage implements OnInit {
   // Segment State
   selectedSegment: 'upcoming' | 'past' | 'cancelled' = 'upcoming';
@@ -53,19 +69,11 @@ export class AppointmentListPage implements OnInit {
     private router: Router,
     private main: MainService,
     private auth: AuthService,
-    private modalController:ModalController,
+    private modalController: ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private actionSheetController: ActionSheetController,
   ) {}
-
-  handleRefresh(event: any) {
-    setTimeout(() => {
-      // Any calls to load data go here
-      event.target.complete();
-      this.ionViewWillEnter();
-    }, 2000);
-  }
 
   ngOnInit() {}
 
@@ -74,7 +82,7 @@ export class AppointmentListPage implements OnInit {
   }
 
   async loadAppointments() {
-     const loading = await this.loadingController.create({
+    const loading = await this.loadingController.create({
       message: 'Loading...',
       spinner: 'lines',
     });
@@ -82,23 +90,27 @@ export class AppointmentListPage implements OnInit {
     await loading.present();
 
     const uid = this.auth.getUID();
-    const db  = getDatabase();
+    const db = getDatabase();
 
     try {
-      const appointmentRef = query(ref(db, 'appointments'), orderByChild('uid'), equalTo(uid));
-      const snapshot       = await get(appointmentRef);
+      const appointmentRef = query(
+        ref(db, 'appointments'),
+        orderByChild('uid'),
+        equalTo(uid),
+      );
+      const snapshot = await get(appointmentRef);
 
       this.appointments = [];
 
       if (snapshot.exists()) {
-        snapshot.forEach(child => {
+        snapshot.forEach((child) => {
           const data = child.val();
 
-          // ONLY patient’s own appointments
+          // ONLY patient's own appointments
           if (data.uid === uid) {
             this.appointments.push({
               id: child.key,
-              ...data
+              ...data,
             });
           }
         });
@@ -117,27 +129,48 @@ export class AppointmentListPage implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    this.upcomingAppointments = this.appointments.filter(apt => {
-      const aptDate = new Date(apt.date);
-      return apt.status === 'pending' && aptDate >= today;
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Upcoming: confirmed, checked_in + future or today
+    this.upcomingAppointments = this.appointments
+      .filter((apt) => {
+        const aptDate = new Date(apt.date);
+        aptDate.setHours(0, 0, 0, 0);
 
-    this.pastAppointments = this.appointments.filter(apt => {
-      const aptDate = new Date(apt.date);
-      return apt.status === 'completed' || (apt.status === 'pending' && aptDate < today);
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return (
+          (apt.status === 'confirmed' || apt.status === 'checked_in') &&
+          aptDate >= today
+        );
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    this.cancelledAppointments = this.appointments.filter(
-      apt => apt.status === 'cancelled'
-    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Past: completed OR (confirmed but date passed)
+    this.pastAppointments = this.appointments
+      .filter((apt) => {
+        const aptDate = new Date(apt.date);
+        aptDate.setHours(0, 0, 0, 0);
+
+        return (
+          apt.status === 'completed' ||
+          (apt.status === 'confirmed' && aptDate < today)
+        );
+      })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // Cancelled
+    this.cancelledAppointments = this.appointments
+      .filter((apt) => apt.status === 'cancelled')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   getDisplayAppointments(): Appointment[] {
     switch (this.selectedSegment) {
-      case 'upcoming': return this.upcomingAppointments;
-      case 'past': return this.pastAppointments;
-      case 'cancelled': return this.cancelledAppointments;
-      default: return [];
+      case 'upcoming':
+        return this.upcomingAppointments;
+      case 'past':
+        return this.pastAppointments;
+      case 'cancelled':
+        return this.cancelledAppointments;
+      default:
+        return [];
     }
   }
 
@@ -161,7 +194,7 @@ export class AppointmentListPage implements OnInit {
       weekday: 'short',
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
@@ -172,7 +205,17 @@ export class AppointmentListPage implements OnInit {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
+    });
+  }
+
+  formatTime(timestamp: string): string {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-MY', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
     });
   }
 
@@ -195,23 +238,65 @@ export class AppointmentListPage implements OnInit {
     return `${days} days left`;
   }
 
+  isToday(dateString: string): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const aptDate = new Date(dateString);
+    aptDate.setHours(0, 0, 0, 0);
+    return today.getTime() === aptDate.getTime();
+  }
+
+  getAppointmentLabel(appt: Appointment): string {
+    if (appt.status === 'checked_in') {
+      return 'In Queue - Waiting';
+    }
+    if (this.isToday(appt.date)) {
+      return 'Today - Ready to Check-In';
+    }
+    return 'Confirmed Appointment';
+  }
+
   getStatusColor(status: AppointmentStatus): string {
     switch (status) {
-      case 'pending': return 'primary';
-      case 'completed': return 'success';
-      case 'cancelled': return 'danger';
-      default: return 'medium';
+      case 'confirmed':
+        return 'primary';
+      case 'checked_in':
+        return 'warning';
+      case 'completed':
+        return 'success';
+      case 'cancelled':
+        return 'danger';
+      default:
+        return 'medium';
     }
   }
 
   getStatusText(status: AppointmentStatus): string {
     switch (status) {
-      case 'pending': return 'Confirmed';
-      case 'completed': return 'Completed';
-      case 'cancelled': return 'Cancelled';
-      default: return status;
+      case 'confirmed':
+        return 'Confirmed';
+      case 'checked_in':
+        return 'In Queue';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status;
     }
   }
+
+  getStatusIcon(status: AppointmentStatus): string {
+    const icons = {
+      confirmed: 'checkmark-circle-outline',
+      checked_in: 'hourglass-outline',
+      completed: 'checkmark-done',
+      cancelled: 'close-circle',
+    };
+    return icons[status] || 'help-circle';
+  }
+
+  // -------- Actions --------
 
   async viewAppointmentDetails(appt: Appointment) {
     const modal = await this.modalController.create({
@@ -219,8 +304,9 @@ export class AppointmentListPage implements OnInit {
       componentProps: {
         appt,
         formatFullDate: (d: string) => this.formatFullDate(d),
+        formatTime: (t: string) => this.formatTime(t),
         getStatusText: (s: AppointmentStatus) => this.getStatusText(s),
-      }
+      },
     });
 
     await modal.present();
@@ -231,32 +317,42 @@ export class AppointmentListPage implements OnInit {
       {
         text: 'View Details',
         icon: 'information-circle-outline',
-        handler: () => this.viewAppointmentDetails(appt)
-      }
+        handler: () => this.viewAppointmentDetails(appt),
+      },
     ];
 
-    // Only allow cancel for upcoming confirmed appointments
-    if (appt.status === 'pending' && this.getDaysUntil(appt.date) >= 0) {
+    // Only allow cancel for upcoming confirmed appointments (not checked in)
+    if (appt.status === 'confirmed' && this.getDaysUntil(appt.date) >= 0) {
       buttons.push({
         text: 'Cancel Appointment',
         icon: 'close-circle-outline',
         role: 'destructive',
-        handler: () => this.cancelAppointment(appt)
+        handler: () => this.cancelAppointment(appt),
       });
     }
 
     buttons.push({
       text: 'Close',
       icon: 'close',
-      role: 'cancel'
+      role: 'cancel',
     });
 
     const sheet = await this.actionSheetController.create({
       header: 'Appointment Options',
-      buttons
+      buttons,
     });
 
     await sheet.present();
+  }
+
+  checkIn(appt: Appointment) {
+    // Navigate to scan page
+    this.router.navigate(['/scan']);
+  }
+
+  viewQueue(appt: Appointment) {
+    // Navigate to queue status
+    this.router.navigate(['/queue-status']);
   }
 
   async cancelAppointment(appt: Appointment) {
@@ -270,41 +366,37 @@ export class AppointmentListPage implements OnInit {
           role: 'destructive',
           handler: async () => {
             await this.processCancellation(appt);
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
   }
 
-  async processCancellation(appointment: any) {
+  async processCancellation(appointment: Appointment) {
     const loading = await this.loadingController.create({
       message: 'Cancelling appointment...',
-      duration: 1500
+      duration: 1500,
     });
 
     await loading.present();
 
     const db = getDatabase();
+    const updates: any = {
+      status: 'cancelled',
+      cancelledAt: new Date().toISOString(),
+    };
 
-    await set(ref(db, `appointments/${appointment.id}/status`), 'cancelled');
+    await update(ref(db, `appointments/${appointment.id}`), updates);
 
     appointment.status = 'cancelled';
+    appointment.cancelledAt = updates.cancelledAt;
     this.filterAppointments();
 
     await loading.dismiss();
     await this.main.showToast('Appointment cancelled', 'success');
   }
-
-  // rescheduleAppointment(appointment: any) {
-  //   this.router.navigate(['/appointment'], {
-  //     queryParams: {
-  //       appointmentId: appointment.id,
-  //       reschedule: true
-  //     }
-  //   });
-  // }
 
   bookNewAppointment() {
     this.router.navigate(['/appointment']);
