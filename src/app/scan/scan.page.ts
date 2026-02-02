@@ -61,7 +61,7 @@ export class ScanPage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     public main: MainService,
-    private auth: AuthService,
+    private auth: AuthService
   ) {}
 
   ngOnInit() {
@@ -113,7 +113,7 @@ export class ScanPage implements OnInit, OnDestroy {
       await this.main.showToast(
         'No appointment found for today',
         'danger',
-        'alert-circle-outline',
+        'alert-circle-outline'
       );
       return;
     }
@@ -133,7 +133,7 @@ export class ScanPage implements OnInit, OnDestroy {
         if (!requested.granted) {
           await this.main.showToast(
             'Camera permission required to scan QR code',
-            'warning',
+            'warning'
           );
           this.isScanning = false;
           return;
@@ -186,7 +186,7 @@ export class ScanPage implements OnInit, OnDestroy {
         'Invalid clinic QR code',
         'danger',
         'close-circle-outline',
-        'top',
+        'top'
       );
       return;
     }
@@ -200,7 +200,7 @@ export class ScanPage implements OnInit, OnDestroy {
         'Invalid clinic QR code',
         'danger',
         'close-circle-outline',
-        'top',
+        'top'
       );
       return;
     }
@@ -216,7 +216,7 @@ export class ScanPage implements OnInit, OnDestroy {
         'Invalid QR code. Please scan the correct clinic counter QR.',
         'danger',
         'alert-circle-outline',
-        'top',
+        'top'
       );
       return;
     }
@@ -243,7 +243,7 @@ export class ScanPage implements OnInit, OnDestroy {
       if (!uid || !appointmentId || !today || !safeType) {
         await this.main.showToast(
           'Missing data for queue generation.',
-          'danger',
+          'danger'
         );
         return;
       }
@@ -275,18 +275,18 @@ export class ScanPage implements OnInit, OnDestroy {
       // Generate queue number using transaction
       const counterRef = ref(
         db,
-        `queueCounters/${today}/${safeType}/lastIssued`,
+        `queueCounters/${today}/${safeType}/lastIssued`
       );
 
       const txn = await runTransaction(
         counterRef,
-        (current) => (current || 0) + 1,
+        (current) => (current || 0) + 1
       );
 
       if (!txn.committed) {
         await this.main.showToast(
           'Queue counter transaction failed.',
-          'danger',
+          'danger'
         );
         return;
       }
@@ -327,6 +327,7 @@ export class ScanPage implements OnInit, OnDestroy {
       await this.main.showToast(
         `Check-in successful! Queue: ${queueNumberText}`,
         'success',
+        'checkmark-done-circle'
       );
 
       // Auto-redirect after 3 seconds
@@ -337,7 +338,7 @@ export class ScanPage implements OnInit, OnDestroy {
       console.error('FCFS generateQueueNumber FAILED:', e);
       await this.main.showToast(
         'Permission denied / failed to generate queue.',
-        'danger',
+        'danger'
       );
     } finally {
       this.isGenerating = false;

@@ -1,9 +1,7 @@
 <ion-header [translucent]="true" class="modern-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button color="light" (click)="goBack()">
-        <ion-icon name="arrow-back-outline"></ion-icon>
-      </ion-button>
+      <ion-back-button color="light" (click)="goBack()"></ion-back-button>
     </ion-buttons>
     <ion-title>My Appointments</ion-title>
     <ion-buttons slot="end">
@@ -146,6 +144,13 @@
               (click)="cancelAppointment(appt); $event.stopPropagation()" class="action-btn danger-action">
               <ion-icon slot="start" name="close-circle-outline"></ion-icon>
               Cancel
+            </ion-button>
+
+            <!-- Reschedule button (only show if status = confirmed) -->
+            <ion-button *ngIf="appt.status !== 'checked_in'" color="warning" size="small"
+              (click)="openRescheduleModal(appt); $event.stopPropagation()" class="action-btn warning-action">
+              <ion-icon slot="start" name="calendar-outline"></ion-icon>
+              Reschedule
             </ion-button>
           </div>
         </ion-card-content>

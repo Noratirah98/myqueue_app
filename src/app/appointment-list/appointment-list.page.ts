@@ -19,6 +19,7 @@ import {
 import { MainService } from '../services/main.service';
 import { AuthService } from '../services/auth.service';
 import { AppointmentDetailModalComponent } from '../appointment-detail-modal/appointment-detail-modal.component';
+import { RescheduleModalComponent } from './components/reschedule-modal/reschedule-modal.component';
 
 export type AppointmentStatus =
   | 'confirmed'
@@ -72,7 +73,7 @@ export class AppointmentListPage implements OnInit {
     private modalController: ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
-    private actionSheetController: ActionSheetController,
+    private actionSheetController: ActionSheetController
   ) {}
 
   ngOnInit() {}
@@ -96,7 +97,7 @@ export class AppointmentListPage implements OnInit {
       const appointmentRef = query(
         ref(db, 'appointments'),
         orderByChild('uid'),
-        equalTo(uid),
+        equalTo(uid)
       );
       const snapshot = await get(appointmentRef);
 
@@ -186,7 +187,6 @@ export class AppointmentListPage implements OnInit {
   }
 
   // -------- UI Helpers --------
-
   formatDate(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -395,7 +395,11 @@ export class AppointmentListPage implements OnInit {
     this.filterAppointments();
 
     await loading.dismiss();
-    await this.main.showToast('Appointment cancelled', 'success');
+    await this.main.showToast(
+      'Appointment cancelled',
+      'success',
+      'checkmark-done-outline'
+    );
   }
 
   bookNewAppointment() {
@@ -404,5 +408,24 @@ export class AppointmentListPage implements OnInit {
 
   goBack() {
     this.router.navigate(['/home']);
+  }
+
+  async openRescheduleModal(appointment: any) {
+    const modal = await this.modalController.create({
+      component: RescheduleModalComponent,
+      componentProps: {
+        appointment: appointment,
+      },
+      cssClass: 'reschedule-modal',
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onWillDismiss();
+
+    if (data && data.success) {
+      // Refresh appointment list
+      this.loadAppointments();
+    }
   }
 }

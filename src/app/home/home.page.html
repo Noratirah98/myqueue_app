@@ -7,16 +7,23 @@
     </ion-title>
 
     <ion-buttons slot="end" class="header-actions">
-      <ion-button color="light" (click)="viewNotifications()">
+      <!-- <ion-button color="light" (click)="viewNotifications()">
         <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
         <ion-badge *ngIf="unreadNotifications > 0" color="danger" class="notification-badge">
           <span>{{ unreadNotifications }}</span>
         </ion-badge>
+      </ion-button> -->
+
+      <!-- Profile Button -->
+      <ion-button color="light" (click)="goToProfile()">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
       </ion-button>
 
+      <!-- Logout Button -->
       <ion-button color="light" (click)="logout()">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
+
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

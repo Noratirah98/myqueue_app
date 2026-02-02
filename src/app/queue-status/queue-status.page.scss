@@ -46,15 +46,9 @@ ion-header.modern-header {
   ion-toolbar {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: white;
-    padding: 0.5rem 0;
-
-    ion-title {
-      font-weight: 800;
-      font-size: 20px;
-    }
 
     ion-button ion-icon {
-      font-size: 24px;
+      color: white;
     }
   }
 }

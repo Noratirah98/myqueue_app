@@ -1,0 +1,375 @@
+// Import same styles as booking page
+
+ion-header {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.modal-content {
+  --background: #f5f7fa;
+}
+
+.content-wrapper {
+  padding: 1rem;
+  padding-bottom: 2rem;
+}
+
+// Current Appointment Card
+.current-appt-card {
+  margin: 0 0 1.5rem 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #667eea;
+
+  ion-card-content {
+    padding: 1rem;
+  }
+
+  .current-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e8eaed;
+
+    ion-icon {
+      font-size: 22px;
+      color: #667eea;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+      color: #2c3e50;
+    }
+  }
+
+  .current-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+
+      .label {
+        font-size: 14px;
+        color: #5a6c7d;
+        font-weight: 600;
+      }
+
+      .value {
+        font-size: 14px;
+        color: #2c3e50;
+        font-weight: 700;
+        text-align: right;
+      }
+    }
+  }
+}
+
+// Section Header
+.section-header {
+  margin-bottom: 1.5rem;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  p {
+    font-size: 14px;
+    color: #5a6c7d;
+    margin: 0;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+}
+
+.section-subheader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  ion-icon {
+    font-size: 22px;
+    color: #667eea;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: #2c3e50;
+  }
+}
+
+// Date Card (SAME AS BOOKING)
+.date-card {
+  margin: 0 0 1.5rem 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 2px solid #e8eaed;
+
+  ion-card-content {
+    padding: 1rem;
+  }
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  .date-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(
+      135deg,
+      rgba(102, 126, 234, 0.1) 0%,
+      rgba(118, 75, 162, 0.1) 100%
+    );
+    border-radius: 12px;
+
+    > ion-icon {
+      font-size: 24px;
+      color: #667eea;
+    }
+
+    .date-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+
+      .date-day {
+        font-size: 16px;
+        font-weight: 800;
+        color: #667eea;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .date-full {
+        font-size: 13px;
+        color: #5a6c7d;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .calendar-btn {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border-radius: 10px;
+    --box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    height: 44px;
+
+    ion-icon {
+      font-size: 22px;
+    }
+  }
+}
+
+// Time Section (SAME AS BOOKING)
+.time-section {
+  margin-bottom: 1.5rem;
+}
+
+.time-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.time-period {
+  .period-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+
+    ion-icon {
+      font-size: 20px;
+      color: #667eea;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+  }
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+
+.time-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px solid #e8eaed;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+
+  ion-icon {
+    font-size: 24px;
+    color: #667eea;
+    transition: all 0.3s ease;
+  }
+
+  span {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+
+  ion-badge {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 9px;
+    padding: 0.25rem 0.5rem;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-4px);
+    border-color: #667eea;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+
+    ion-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &.selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+
+    ion-icon,
+    span {
+      color: #ffffff;
+    }
+  }
+
+  &.unavailable {
+    background: #f8f9fa;
+    border-color: #e8eaed;
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    ion-icon,
+    span {
+      color: #a0aec0;
+    }
+  }
+}
+
+// Info Card
+.info-card {
+  margin: 1.5rem 0 0 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.1) 0%,
+    rgba(255, 152, 0, 0.1) 100%
+  );
+  border: 2px solid rgba(255, 193, 7, 0.3);
+  box-shadow: none;
+
+  ion-card-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+
+    > ion-icon {
+      font-size: 24px;
+      color: #ff9800;
+      flex-shrink: 0;
+    }
+
+    .info-text {
+      font-size: 13px;
+      color: #5a6c7d;
+      line-height: 1.5;
+
+      strong {
+        color: #ff9800;
+      }
+    }
+  }
+}
+
+// Action Buttons
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+
+  ion-button {
+    flex: 1;
+    --border-radius: 12px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 15px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+
+  .save-btn {
+    --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+
+    &:hover {
+      --box-shadow: 0 8px 28px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      --box-shadow: none;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .time-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

@@ -4,21 +4,13 @@ import {
   equalTo,
   get,
   getDatabase,
-  onValue,
   orderByChild,
   push,
   query,
   ref,
-  set,
 } from 'firebase/database';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import {
-  AlertController,
-  LoadingController,
-  NavController,
-  ToastController,
-} from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
 
 interface TimeSlot {
@@ -101,7 +93,7 @@ export class AppointmentPage implements OnInit {
     private auth: AuthService,
     private main: MainService,
     private navCtrl: NavController,
-    private alertController: AlertController,
+    private alertController: AlertController
   ) {
     this.appointmentForm = this.fb.group({
       appointmentType: ['', Validators.required],
@@ -380,7 +372,7 @@ export class AppointmentPage implements OnInit {
           'You already have an appointment on this date',
           'warning',
           'alert-circle-outline',
-          'top',
+          'top'
         );
         return;
       }

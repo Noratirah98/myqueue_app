@@ -53,7 +53,7 @@ export class HomePage implements OnInit {
     private auth: AuthService,
     private storage: StorageService,
     private loadingController: LoadingController,
-    private alertController: AlertController,
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {}
@@ -113,7 +113,7 @@ export class HomePage implements OnInit {
     const appointmentRef = query(
       ref(db, 'appointments'),
       orderByChild('uid'),
-      equalTo(uid),
+      equalTo(uid)
     );
 
     onValue(appointmentRef, (snapshot) => {
@@ -156,7 +156,7 @@ export class HomePage implements OnInit {
           return d >= today;
         })
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
       this.nextAppointment = upcoming.length > 0 ? upcoming[0] : null;
@@ -254,7 +254,7 @@ export class HomePage implements OnInit {
       this.estimatedWaitTime = ahead * 5;
 
       console.log(
-        `📊 People ahead: ${ahead}, Queue: ${this.userQueueNumber}, Status: ${this.myQueueStatus}`,
+        `📊 People ahead: ${ahead}, Queue: ${this.userQueueNumber}, Status: ${this.myQueueStatus}`
       );
     });
 
@@ -276,7 +276,7 @@ export class HomePage implements OnInit {
         // Format display number
         this.currentServingNumber = this.formatQueueNumberFromKey(
           servingKey,
-          type,
+          type
         );
 
         console.log('📢 Current serving:', this.currentServingNumber);
@@ -449,7 +449,7 @@ export class HomePage implements OnInit {
       localStorage.setItem('myQueueKey', String(this.nextAppointment.queueKey));
       localStorage.setItem(
         'myQueueNumberText',
-        this.nextAppointment.queueNumberText || '',
+        this.nextAppointment.queueNumberText || ''
       );
       localStorage.setItem('myQueueType', clinicType);
       localStorage.setItem('myQueueDate', today);
@@ -476,7 +476,7 @@ export class HomePage implements OnInit {
               if (snap.exists()) {
                 const appointmentRef = ref(
                   db,
-                  `appointments/${appointment.id}`,
+                  `appointments/${appointment.id}`
                 );
                 await get(appointmentRef).then(async (snapshot) => {
                   if (snapshot.exists()) {
@@ -489,23 +489,23 @@ export class HomePage implements OnInit {
                       this.main.showToast(
                         'Appointment cancelled',
                         'success',
-                        'checkmark-circle',
+                        'checkmark-done-outline'
                       );
                     });
                   }
                 });
               }
-            },
+            }
           );
         } catch (error) {
           console.error('Error cancelling appointment:', error);
           this.main.showToast(
             'Error cancelling appointment',
             'danger',
-            'alert-circle',
+            'alert-circle'
           );
         }
-      },
+      }
     );
   }
 
@@ -515,8 +515,8 @@ export class HomePage implements OnInit {
     this.main.showToast('Refreshed', 'success', 'refresh');
   }
 
-  viewNotifications() {
-    // Optional: Navigate to notifications page
+  goToProfile() {
+    this.router.navigate(['/profile']);
   }
 
   async logout() {
@@ -554,7 +554,7 @@ export class HomePage implements OnInit {
       await this.main.showToast(
         'Logged out successfully',
         'success',
-        'checkmark-done-circle',
+        'checkmark-done-circle'
       );
       this.router.navigateByUrl('/login', { replaceUrl: true });
     } catch (error) {
@@ -562,7 +562,7 @@ export class HomePage implements OnInit {
       await this.main.showToast(
         'Error logging out. Please try again.',
         'danger',
-        'alert-circle',
+        'alert-circle'
       );
     } finally {
       await loading.dismiss();

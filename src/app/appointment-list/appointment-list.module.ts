@@ -7,14 +7,16 @@ import { IonicModule } from '@ionic/angular';
 import { AppointmentListPageRoutingModule } from './appointment-list-routing.module';
 
 import { AppointmentListPage } from './appointment-list.page';
+import { RescheduleModalComponentModule } from './components/reschedule-modal/reschedule-modal.component.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    AppointmentListPageRoutingModule
+    RescheduleModalComponentModule,
+    AppointmentListPageRoutingModule,
   ],
-  declarations: [AppointmentListPage]
+  declarations: [AppointmentListPage],
 })
 export class AppointmentListPageModule {}

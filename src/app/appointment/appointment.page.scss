@@ -47,27 +47,13 @@
 
 ion-header.modern-header {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
   ion-toolbar {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: #ffffff;
-    padding: 0.5rem 0;
-    ion-title {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      font-weight: 700;
-      font-size: 18px;
-      letter-spacing: 0.5px;
-      ion-icon {
-        font-size: 24px;
-      }
-    }
 
-    ion-button {
-      ion-icon {
-        font-size: 24px;
-      }
+    ion-button ion-icon {
+      color: white;
     }
   }
 }

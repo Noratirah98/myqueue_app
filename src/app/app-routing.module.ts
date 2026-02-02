@@ -30,21 +30,15 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./notification2/notification2.module').then(
-        (m) => m.Notification2PageModule,
+        (m) => m.Notification2PageModule
       ),
-  },
-  {
-    path: 'profile2',
-    canActivate: [AuthGuard],
-    loadChildren: () =>
-      import('./profile2/profile2.module').then((m) => m.Profile2PageModule),
   },
   {
     path: 'appointment',
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./appointment/appointment.module').then(
-        (m) => m.AppointmentPageModule,
+        (m) => m.AppointmentPageModule
       ),
   },
   {
@@ -52,7 +46,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./queue-status/queue-status.module').then(
-        (m) => m.QueueStatusPageModule,
+        (m) => m.QueueStatusPageModule
       ),
   },
   {
@@ -60,7 +54,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./appointment-list/appointment-list.module').then(
-        (m) => m.AppointmentListPageModule,
+        (m) => m.AppointmentListPageModule
       ),
   },
   {
@@ -68,6 +62,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     loadChildren: () =>
       import('./scan/scan.module').then((m) => m.ScanPageModule),
+  },
+  {
+    path: 'profile',
+    canActivate: [AuthGuard],
+    loadChildren: () =>
+      import('./profile/profile.module').then((m) => m.ProfilePageModule),
   },
 ];
 

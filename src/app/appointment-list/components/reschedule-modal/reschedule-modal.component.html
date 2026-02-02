@@ -1,0 +1,140 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Reschedule Appointment</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <div class="content-wrapper">
+
+    <!-- Current Appointment Info -->
+    <ion-card class="current-appt-card">
+      <ion-card-content>
+        <div class="current-header">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <h3>Current Appointment</h3>
+        </div>
+        <div class="current-details">
+          <div class="detail-row">
+            <span class="label">Type:</span>
+            <span class="value">{{ appointment.appointmentType }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Date:</span>
+            <span class="value">{{ formatDisplayDate(appointment.date) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Time:</span>
+            <span class="value">{{ appointment.time }}</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="section-header">
+      <h2>Select New Date & Time</h2>
+      <p>Choose a new date and time for your appointment</p>
+    </div>
+
+    <!-- Date Selector (SAME AS BOOKING) -->
+    <ion-card class="date-card">
+      <ion-card-content>
+        <div class="date-selector">
+          <div class="date-display">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <div class="date-text">
+              <span class="date-day">{{ getDateDay() }}</span>
+              <span class="date-full">{{ displayDate }}</span>
+            </div>
+          </div>
+
+          <ion-button fill="solid" size="small" id="calendar-btn" class="calendar-btn">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-popover trigger="calendar-btn" class="calendar-popover">
+      <ng-template>
+        <ion-datetime presentation="date" [min]="minDate" [isDateEnabled]="isDateEnabled"
+          (ionChange)="onCalendarSelected($event.detail.value)">
+        </ion-datetime>
+      </ng-template>
+    </ion-popover>
+
+    <!-- Time Slots (SAME AS BOOKING) -->
+    <div class="time-section">
+      <div class="section-subheader">
+        <ion-icon name="time-outline"></ion-icon>
+        <h3>Select Time</h3>
+      </div>
+
+      <div class="time-slots-container">
+        <!-- Morning Slots -->
+        <div class="time-period">
+          <div class="period-label">
+            <ion-icon name="sunny-outline"></ion-icon>
+            <span>Morning</span>
+          </div>
+          <div class="time-grid">
+            <button *ngFor="let slot of getMorningSlots()" class="time-slot" [class.unavailable]="!slot.available"
+              [class.selected]="selectedSlot?.time === slot.time" [disabled]="!slot.available"
+              (click)="selectSlot(slot)">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{slot.display}}</span>
+              <ion-badge *ngIf="!slot.available" color="danger">Full</ion-badge>
+            </button>
+          </div>
+        </div>
+
+        <!-- Afternoon Slots -->
+        <div class="time-period">
+          <div class="period-label">
+            <ion-icon name="partly-sunny-outline"></ion-icon>
+            <span>Afternoon</span>
+          </div>
+          <div class="time-grid">
+            <button *ngFor="let slot of getAfternoonSlots()" class="time-slot" [class.unavailable]="!slot.available"
+              [class.selected]="selectedSlot?.time === slot.time" [disabled]="!slot.available"
+              (click)="selectSlot(slot)">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{slot.display}}</span>
+              <ion-badge *ngIf="!slot.available" color="danger">Full</ion-badge>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <ion-card class="info-card">
+      <ion-card-content>
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <div class="info-text">
+          <strong>Note:</strong> Clinic operates Monday - Friday, 9:00 AM - 5:00 PM.
+          Weekends and public holidays are closed.
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <ion-button expand="block" fill="outline" color="medium" (click)="dismiss()">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Cancel
+      </ion-button>
+
+      <ion-button expand="block" class="save-btn" [disabled]="!canSave()" (click)="saveReschedule()">
+        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+        Save Changes
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

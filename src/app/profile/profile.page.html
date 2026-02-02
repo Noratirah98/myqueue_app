@@ -1,0 +1,297 @@
+<ion-header [translucent]="true" class="modern-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button color="light" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Profile</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" fill="clear">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading profile...</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!loading && patientData" class="profile-container">
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="avatar">
+        <ion-icon name="person"></ion-icon>
+      </div>
+      <h2>{{ patientData.fullName }}</h2>
+      <p class="mrn-number">MRN: {{ patientData.mrnNumber || 'N/A' }}</p>
+    </div>
+
+    <!-- Personal Information (Read-only) -->
+    <div class="info-section">
+      <div class="section-header">
+        <ion-icon name="person-outline"></ion-icon>
+        <h3>Personal Information</h3>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Full Name</span>
+          </div>
+          <div class="info-value">{{ patientData.fullName || 'N/A' }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="card-outline"></ion-icon>
+            <span>IC Number</span>
+          </div>
+          <div class="info-value">{{ patientData.icNumber || 'N/A' }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>Date of Birth</span>
+          </div>
+          <div class="info-value">{{ formatDate(patientData.dateOfBirth) }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="male-female-outline"></ion-icon>
+            <span>Gender</span>
+          </div>
+          <div class="info-value">{{ patientData.gender || 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Information (Read-only) -->
+    <div class="info-section">
+      <div class="section-header">
+        <ion-icon name="call-outline"></ion-icon>
+        <h3>Contact Information</h3>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="mail-outline"></ion-icon>
+            <span>Email</span>
+          </div>
+          <div class="info-value">{{ patientData.email || 'N/A' }}</div>
+        </div>
+
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="call-outline"></ion-icon>
+            <span>Phone Number</span>
+          </div>
+          <div class="info-value">{{ patientData.phoneNumber || 'N/A' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Address (Editable) -->
+    <div class="info-section">
+      <div class="section-header">
+        <ion-icon name="location-outline"></ion-icon>
+        <h3>Address</h3>
+        <ion-button *ngIf="!editingAddress" (click)="toggleEditAddress()" size="small" fill="clear" class="edit-btn">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+      </div>
+
+      <div class="info-card">
+        <!-- View Mode -->
+        <div *ngIf="!editingAddress" class="info-row address-row">
+          <div class="info-label">
+            <ion-icon name="home-outline"></ion-icon>
+            <span>Current Address</span>
+          </div>
+          <div class="info-value address-text">{{ patientData.address || 'No address provided' }}</div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div *ngIf="editingAddress" class="edit-mode">
+          <ion-item>
+            <ion-label position="stacked">
+              <ion-icon name="home-outline"></ion-icon>
+              Address
+            </ion-label>
+            <ion-textarea [(ngModel)]="editedAddress" rows="4" placeholder="Enter your full address" [counter]="true"
+              maxlength="200">
+            </ion-textarea>
+          </ion-item>
+
+          <div class="action-buttons">
+            <ion-button (click)="cancelEditAddress()" fill="outline" color="medium" expand="block">
+              <ion-icon slot="start" name="close-outline"></ion-icon>
+              Cancel
+            </ion-button>
+            <ion-button (click)="saveAddress()" expand="block"
+              [disabled]="!editedAddress || editedAddress.trim() === ''">
+              <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+              Save Address
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Contact (Editable) -->
+    <div class="info-section">
+      <div class="section-header">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <h3>Emergency Contact</h3>
+        <ion-button *ngIf="!editingEmergency" (click)="toggleEditEmergency()" size="small" fill="clear"
+          class="edit-btn">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Edit
+        </ion-button>
+      </div>
+
+      <div class="info-card">
+        <!-- View Mode -->
+        <div *ngIf="!editingEmergency">
+          <div class="info-row">
+            <div class="info-label">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>Name</span>
+            </div>
+            <div class="info-value">
+              {{ patientData.emergencyContact?.name || 'N/A' }}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">
+              <ion-icon name="people-outline"></ion-icon>
+              <span>Relationship</span>
+            </div>
+            <div class="info-value">
+              {{ patientData.emergencyContact?.relationship || 'N/A' }}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">
+              <ion-icon name="call-outline"></ion-icon>
+              <span>Phone Number</span>
+            </div>
+            <div class="info-value">
+              {{ patientData.emergencyContact?.phoneNumber || 'N/A' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div *ngIf="editingEmergency" class="edit-mode">
+          <ion-item>
+            <ion-label position="stacked">
+              <ion-icon name="person-outline"></ion-icon>
+              Contact Name *
+            </ion-label>
+            <ion-input [(ngModel)]="editedEmergencyContact.name" type="text" placeholder="e.g., Siti Binti Hassan"
+              maxlength="50">
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">
+              <ion-icon name="people-outline"></ion-icon>
+              Relationship *
+            </ion-label>
+            <ion-select [(ngModel)]="editedEmergencyContact.relationship" placeholder="Select relationship">
+              <ion-select-option value="Spouse">Spouse</ion-select-option>
+              <ion-select-option value="Father">Father</ion-select-option>
+              <ion-select-option value="Mother">Mother</ion-select-option>
+              <ion-select-option value="Son">Son</ion-select-option>
+              <ion-select-option value="Daughter">Daughter</ion-select-option>
+              <ion-select-option value="Brother">Brother</ion-select-option>
+              <ion-select-option value="Sister">Sister</ion-select-option>
+              <ion-select-option value="Friend">Friend</ion-select-option>
+              <ion-select-option value="Other">Other</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="stacked">
+              <ion-icon name="call-outline"></ion-icon>
+              Phone Number *
+            </ion-label>
+            <ion-input [(ngModel)]="editedEmergencyContact.phoneNumber" type="tel" placeholder="e.g., 0123456789"
+              maxlength="15">
+            </ion-input>
+          </ion-item>
+
+          <div class="action-buttons">
+            <ion-button (click)="cancelEditEmergency()" fill="outline" color="medium" expand="block">
+              <ion-icon slot="start" name="close-outline"></ion-icon>
+              Cancel
+            </ion-button>
+            <ion-button (click)="saveEmergencyContact()" expand="block" [disabled]="!isEmergencyContactValid()">
+              <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+              Save Contact
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Information -->
+    <div class="info-section">
+      <div class="section-header">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <h3>Account Information</h3>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <div class="info-label">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>Member Since</span>
+          </div>
+          <div class="info-value">{{ formatTimestamp(patientData.createdAt) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="logout-overlay" *ngIf="showLogoutConfirm" (click)="showLogoutConfirm = false">
+      <div class="logout-modal" (click)="$event.stopPropagation()">
+
+        <div class="logout-icon-wrapper">
+          <div class="logout-icon">
+            <ion-icon name="log-out-outline"></ion-icon>
+          </div>
+        </div>
+
+        <div class="logout-content">
+          <h2 class="logout-title">Logout</h2>
+          <p class="logout-message">Are you sure you want to logout?</p>
+        </div>
+
+        <div class="logout-actions">
+          <ion-button expand="block" fill="outline" class="cancel-btn" (click)="showLogoutConfirm = false">
+            Cancel
+          </ion-button>
+          <ion-button expand="block" color="danger" class="confirm-btn" (click)="confirmLogout()">
+            <ion-icon slot="start" name="log-out"></ion-icon>
+            Yes, Logout
+          </ion-button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</ion-content>
