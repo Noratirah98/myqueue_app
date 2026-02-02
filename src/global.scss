@@ -96,3 +96,56 @@ body.scanner-active {
   --background: transparent;
   --ion-background-color: transparent;
 }
+
+::ng-deep {
+  .your-turn-alert {
+    .alert-wrapper {
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(16, 220, 96, 0.3);
+    }
+
+    .alert-head {
+      background: linear-gradient(135deg, #10dc60 0%, #0ec254 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px 16px 0 0;
+
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+      }
+    }
+
+    .alert-message {
+      padding: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .alert-button-confirm {
+      font-weight: 700;
+      color: #10dc60;
+      font-size: 16px;
+    }
+  }
+
+  .service-completed-alert {
+    .alert-wrapper {
+      border-radius: 16px;
+    }
+
+    .alert-head {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px 16px 0 0;
+
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+      }
+    }
+  }
+}

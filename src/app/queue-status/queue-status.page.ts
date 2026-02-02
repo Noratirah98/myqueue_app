@@ -40,7 +40,7 @@ export class QueueStatusPage implements OnInit {
 
   constructor(
     private router: Router,
-    private alertController: AlertController,
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -237,15 +237,7 @@ export class QueueStatusPage implements OnInit {
     // 3. Show Alert Popup
     const alert = await this.alertController.create({
       header: "🎉 It's Your Turn!",
-      message: `<div style="text-align: center; padding: 10px;">
-                  <h2 style="color: #10dc60; margin: 10px 0;">Queue ${this.myQueueNumberText}</h2>
-                  <p style="font-size: 16px; margin: 15px 0;">
-                    <strong>Please proceed to the ${this.myQueueType} counter now.</strong>
-                  </p>
-                  <p style="font-size: 14px; color: #666;">
-                    Thank you for your patience! 😊
-                  </p>
-                </div>`,
+      message: `Queue ${this.myQueueNumberText}. Please proceed to the ${this.myQueueType} counter now. Thank you for your patience! 😊`,
       cssClass: 'your-turn-alert',
       buttons: [
         {
@@ -267,14 +259,7 @@ export class QueueStatusPage implements OnInit {
   private async showServiceCompletedNotification() {
     const alert = await this.alertController.create({
       header: '✅ Service Completed',
-      message: `<div style="text-align: center; padding: 10px;">
-                  <p style="font-size: 16px; margin: 15px 0;">
-                    Thank you for using MyQueue!
-                  </p>
-                  <p style="font-size: 14px; color: #666;">
-                    We hope you had a pleasant experience. 😊
-                  </p>
-                </div>`,
+      message: `Thank you for using MyQueue! We hope you had a pleasant experience. 😊`,
       cssClass: 'service-completed-alert',
       buttons: ['OK'],
       backdropDismiss: false,
@@ -302,7 +287,7 @@ export class QueueStatusPage implements OnInit {
 
     // Filter only waiting and serving
     const active = allQueue.filter(
-      (q) => q.data?.status === 'waiting' || q.data?.status === 'serving',
+      (q) => q.data?.status === 'waiting' || q.data?.status === 'serving'
     );
 
     // Get current serving + next 4
@@ -316,7 +301,7 @@ export class QueueStatusPage implements OnInit {
     // Add current serving if exists
     if (this.currentServingKey > 0) {
       const servingEntry = allQueue.find(
-        (q) => q.key === this.currentServingKey,
+        (q) => q.key === this.currentServingKey
       );
       if (servingEntry) {
         upcoming.push({
