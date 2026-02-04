@@ -20,6 +20,7 @@ import { MainService } from '../services/main.service';
 import { AuthService } from '../services/auth.service';
 import { AppointmentDetailModalComponent } from '../appointment-detail-modal/appointment-detail-modal.component';
 import { RescheduleModalComponent } from './components/reschedule-modal/reschedule-modal.component';
+import { AuthGuard } from '../guards/auth.guard';
 
 export type AppointmentStatus =
   | 'confirmed'
@@ -68,13 +69,16 @@ export class AppointmentListPage implements OnInit {
 
   constructor(
     private router: Router,
-    private main: MainService,
+    public main: MainService,
     private auth: AuthService,
+    private authGuard: AuthGuard,
     private modalController: ModalController,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private actionSheetController: ActionSheetController
-  ) {}
+  ) {
+    // this.authGuard.canActivate();
+  }
 
   ngOnInit() {}
 
@@ -404,10 +408,6 @@ export class AppointmentListPage implements OnInit {
 
   bookNewAppointment() {
     this.router.navigate(['/appointment']);
-  }
-
-  goBack() {
-    this.router.navigate(['/home']);
   }
 
   async openRescheduleModal(appointment: any) {

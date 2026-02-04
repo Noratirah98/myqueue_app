@@ -12,6 +12,7 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, NavController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 interface TimeSlot {
   time: string;
@@ -92,9 +93,12 @@ export class AppointmentPage implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private main: MainService,
+    private authGuard: AuthGuard,
     private navCtrl: NavController,
     private alertController: AlertController
   ) {
+    // this.authGuard.canActivate();
+
     this.appointmentForm = this.fb.group({
       appointmentType: ['', Validators.required],
       date: ['', Validators.required],

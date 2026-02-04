@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
+import { MainService } from '../services/main.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 @Component({
   selector: 'app-queue-status',
@@ -40,8 +42,12 @@ export class QueueStatusPage implements OnInit {
 
   constructor(
     private router: Router,
+    public main: MainService,
+    private authGuard: AuthGuard,
     private alertController: AlertController
-  ) {}
+  ) {
+    // this.authGuard.canActivate();
+  }
 
   ngOnInit() {
     this.loadQueueIdentity();
@@ -372,11 +378,5 @@ export class QueueStatusPage implements OnInit {
   refreshQueue() {
     // Firebase already real-time, just visual feedback
     console.log('🔄 Queue refreshed');
-  }
-
-  // Don't clear session when going back to home
-  backHome() {
-    console.log('⬅️ Going back to home (session preserved)');
-    this.router.navigateByUrl('/home', { replaceUrl: true });
   }
 }

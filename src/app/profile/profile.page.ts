@@ -1,14 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  LoadingController,
-  NavController,
-  ToastController,
-} from '@ionic/angular';
+import { LoadingController, NavController } from '@ionic/angular';
 import { getAuth, signOut } from 'firebase/auth';
 import { getDatabase, ref, get, update } from 'firebase/database';
 import { StorageService } from '../services/storage.service';
 import { MainService } from '../services/main.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 interface EmergencyContact {
   name: string;
@@ -39,7 +36,6 @@ export class ProfilePage implements OnInit {
   loading: boolean = true;
   patientData: PatientData | null = null;
   userId: string = '';
-  showLogoutConfirm = false;
 
   // Edit states
   editingAddress: boolean = false;
@@ -55,12 +51,13 @@ export class ProfilePage implements OnInit {
 
   constructor(
     private router: Router,
-    private main: MainService,
-    private navCtrl: NavController,
+    public main: MainService,
+    private authGuard: AuthGuard,
     private storage: StorageService,
-    private toastController: ToastController,
     private loadingController: LoadingController
-  ) {}
+  ) {
+    // this.authGuard.canActivate();
+  }
 
   ngOnInit() {
     this.loadProfile();
@@ -261,58 +258,5 @@ export class ProfilePage implements OnInit {
     const year = date.getFullYear();
 
     return `${day}-${month}-${year}`;
-  }
-
-  /* ================= NAVIGATION ================= */
-  goBack() {
-    this.navCtrl.back();
-  }
-
-  // ===== LOGOUT =====
-  async logout() {
-    this.showLogoutConfirm = true;
-  }
-
-  async confirmLogout() {
-    this.showLogoutConfirm = false;
-
-    const loading = await this.loadingController.create({
-      message: 'Logging out...',
-      duration: 1500,
-    });
-    await loading.present();
-
-    try {
-      const auth = getAuth();
-
-      // Clear queue session before logout
-      await this.storage.remove('patientName');
-      await this.storage.remove('uid');
-
-      // Clear queue localStorage
-      localStorage.removeItem('myQueueKey');
-      localStorage.removeItem('myQueueNumberText');
-      localStorage.removeItem('myQueueType');
-      localStorage.removeItem('myQueueDate');
-
-      await signOut(auth);
-
-      console.log('User logged out successfully');
-      await this.main.showToast(
-        'Logged out successfully',
-        'success',
-        'checkmark-done-circle'
-      );
-      this.router.navigateByUrl('/login', { replaceUrl: true });
-    } catch (error) {
-      console.error('Logout error:', error);
-      await this.main.showToast(
-        'Error logging out. Please try again.',
-        'danger',
-        'alert-circle'
-      );
-    } finally {
-      await loading.dismiss();
-    }
   }
 }

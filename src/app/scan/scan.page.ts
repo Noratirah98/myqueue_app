@@ -15,6 +15,7 @@ import {
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { MainService } from '../services/main.service';
 import { AuthService } from '../services/auth.service';
+import { AuthGuard } from '../guards/auth.guard';
 
 type AppointmentStatus = 'confirmed' | 'cancelled' | 'completed' | 'checked_in';
 
@@ -61,8 +62,11 @@ export class ScanPage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     public main: MainService,
-    private auth: AuthService
-  ) {}
+    private auth: AuthService,
+    private authGuard: AuthGuard
+  ) {
+    // this.authGuard.canActivate();
+  }
 
   ngOnInit() {
     this.validateTodayAppointment();
@@ -70,10 +74,6 @@ export class ScanPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopScan();
-  }
-
-  goBack() {
-    this.router.navigate(['/home']);
   }
 
   /* ------------------------------- VALIDATE TODAY APPOINTMENT --------------------------------*/

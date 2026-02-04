@@ -1,14 +1,9 @@
 <ion-header [translucent]="true" class="modern-header">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button color="light" (click)="goBack()"></ion-back-button>
+    <ion-buttons color="light" slot="start" (click)="main.navigateForward('home')">
+      <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon> Back
     </ion-buttons>
     <ion-title>My Profile</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()" fill="clear">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -262,34 +257,6 @@
           </div>
           <div class="info-value">{{ formatTimestamp(patientData.createdAt) }}</div>
         </div>
-      </div>
-    </div>
-
-    <!-- Logout Confirmation Modal -->
-    <div class="logout-overlay" *ngIf="showLogoutConfirm" (click)="showLogoutConfirm = false">
-      <div class="logout-modal" (click)="$event.stopPropagation()">
-
-        <div class="logout-icon-wrapper">
-          <div class="logout-icon">
-            <ion-icon name="log-out-outline"></ion-icon>
-          </div>
-        </div>
-
-        <div class="logout-content">
-          <h2 class="logout-title">Logout</h2>
-          <p class="logout-message">Are you sure you want to logout?</p>
-        </div>
-
-        <div class="logout-actions">
-          <ion-button expand="block" fill="outline" class="cancel-btn" (click)="showLogoutConfirm = false">
-            Cancel
-          </ion-button>
-          <ion-button expand="block" color="danger" class="confirm-btn" (click)="confirmLogout()">
-            <ion-icon slot="start" name="log-out"></ion-icon>
-            Yes, Logout
-          </ion-button>
-        </div>
-
       </div>
     </div>
 

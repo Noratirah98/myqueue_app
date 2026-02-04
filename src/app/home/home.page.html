@@ -6,21 +6,14 @@
       </div>
     </ion-title>
 
-    <ion-buttons slot="end" class="header-actions">
-      <!-- <ion-button color="light" (click)="viewNotifications()">
-        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
-        <ion-badge *ngIf="unreadNotifications > 0" color="danger" class="notification-badge">
-          <span>{{ unreadNotifications }}</span>
-        </ion-badge>
-      </ion-button> -->
-
+    <ion-buttons slot="end" class="header-actions" collapse="true">
       <!-- Profile Button -->
       <ion-button color="light" (click)="goToProfile()">
         <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
       </ion-button>
 
       <!-- Logout Button -->
-      <ion-button color="light" (click)="logout()">
+      <ion-button color="light" (click)="logout($event)">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
 
@@ -412,7 +405,7 @@
           <ion-button expand="block" fill="outline" class="cancel-btn" (click)="showLogoutConfirm = false">
             Cancel
           </ion-button>
-          <ion-button expand="block" color="danger" class="confirm-btn" (click)="confirmLogout()">
+          <ion-button expand="block" class="confirm-btn" (click)="confirmLogout()">
             <ion-icon slot="start" name="log-out"></ion-icon>
             Yes, Logout
           </ion-button>

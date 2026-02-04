@@ -15,6 +15,7 @@ import { AuthService } from '../services/auth.service';
 import { StorageService } from '../services/storage.service';
 import { MainService } from '../services/main.service';
 import { AlertController, LoadingController } from '@ionic/angular';
+import { AuthGuard } from '../guards/auth.guard';
 
 @Component({
   selector: 'app-home',
@@ -37,7 +38,7 @@ export class HomePage implements OnInit {
   loadingAppointment = true;
   showLogoutConfirm = false;
 
-  // ✅ NEW: Track actual queue status
+  // Track actual queue status
   myQueueStatus: string = 'waiting';
 
   // Store listener references for cleanup
@@ -51,9 +52,10 @@ export class HomePage implements OnInit {
     private router: Router,
     private main: MainService,
     private auth: AuthService,
+    private authGuard: AuthGuard,
     private storage: StorageService,
-    private loadingController: LoadingController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {}
@@ -281,12 +283,10 @@ export class HomePage implements OnInit {
 
         console.log('📢 Current serving:', this.currentServingNumber);
 
-        // CHECK IF IT'S YOUR TURN! 🎉
         if (
           servingKey === this.myQueueKey &&
           this.myQueueStatus === 'serving'
         ) {
-          console.log("🎉 IT'S YOUR TURN!!!");
           this.showYourTurnNotification();
         }
       } else {
@@ -333,17 +333,17 @@ export class HomePage implements OnInit {
     });
 
     await alert.present();
-
-    // Show toast as well
-    await this.main.showToast("🎉 It's Your Turn!", 'success', 'notifications');
   }
 
   /* Handle service completed */
   async handleServiceCompleted() {
     const alert = await this.alertController.create({
-      header: 'Service Completed ✅',
-      message: 'Thank you for using MyQueue!',
+      header: '✅ Service Completed',
+      message:
+        'Thank you for using MyQueue! We hope you had a pleasant experience. 😊',
       buttons: ['OK'],
+      cssClass: 'service-completed-alert',
+      backdropDismiss: false,
     });
 
     await alert.present();
@@ -519,8 +519,18 @@ export class HomePage implements OnInit {
     this.router.navigate(['/profile']);
   }
 
-  async logout() {
+  async logout(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+
     this.showLogoutConfirm = true;
+
+    // Force change detection
+    setTimeout(() => {
+      console.log('🔍 Modal state:', this.showLogoutConfirm);
+    }, 100);
   }
 
   async confirmLogout() {
@@ -536,8 +546,9 @@ export class HomePage implements OnInit {
       const auth = getAuth();
 
       // Clear queue session before logout
-      await this.storage.remove('patientName');
       await this.storage.remove('uid');
+      await this.storage.remove('isLoggedIn');
+      await this.storage.remove('patientName');
 
       // Clear queue localStorage
       localStorage.removeItem('myQueueKey');

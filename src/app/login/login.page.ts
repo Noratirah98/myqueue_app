@@ -11,11 +11,7 @@ import {
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { Router } from '@angular/router';
-import {
-  AlertController,
-  LoadingController,
-  ToastController,
-} from '@ionic/angular';
+import { AlertController, LoadingController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
 import { get, getDatabase, ref } from 'firebase/database';
 import { StorageService } from '../services/storage.service';
@@ -45,17 +41,14 @@ export class LoginPage implements OnInit {
     private main: MainService,
     private storage: StorageService,
     private alertController: AlertController,
-    private loadingController: LoadingController,
+    private loadingController: LoadingController
   ) {}
 
   ngOnInit() {
     this.checkRememberedUser();
   }
 
-  // ============================================
-  // LOGIN METHODS
-  // ============================================
-
+  // ============================================ LOGIN METHODS ============================================
   checkRememberedUser() {
     const rememberedEmail = localStorage.getItem('rememberedEmail');
     if (rememberedEmail) {
@@ -91,7 +84,7 @@ export class LoginPage implements OnInit {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        this.loginData.password,
+        this.loginData.password
       );
 
       const uid = userCredential.user.uid;
@@ -107,6 +100,7 @@ export class LoginPage implements OnInit {
         const patientName = patient?.userName ?? 'Patient';
 
         await this.storage.set('patientName', patientName);
+        await this.storage.set('isLoggedIn', true);
       } catch (error: any) {
         console.log('LOGIN ERROR FULL:', error);
         console.log('CODE:', error?.code);
@@ -126,7 +120,7 @@ export class LoginPage implements OnInit {
       await this.main.showToast(
         'Login successfully',
         'success',
-        'checkmark-done-circle',
+        'checkmark-done-circle'
       );
 
       this.router.navigateByUrl('/home');
@@ -220,7 +214,7 @@ export class LoginPage implements OnInit {
         'Please enter a valid email address',
         'warning',
         'alert-circle-outline',
-        'top',
+        'top'
       );
       return;
     }
@@ -235,7 +229,7 @@ export class LoginPage implements OnInit {
         'Reset link sent. Please check your email.',
         'success',
         'mail-outline',
-        'top',
+        'top'
       );
 
       // optional: auto close modal

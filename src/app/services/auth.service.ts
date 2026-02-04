@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  uid: string = "";
+  uid: string = '';
 
   constructor() {
     const auth = getAuth();
@@ -13,15 +13,15 @@ export class AuthService {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         this.uid = user.uid;
-        localStorage.setItem("uid", user.uid);
+        localStorage.setItem('uid', user.uid);
       } else {
-        this.uid = "";
-        localStorage.removeItem("uid");
+        this.uid = '';
+        localStorage.removeItem('uid');
       }
     });
   }
 
   getUID() {
-    return this.uid || localStorage.getItem("uid");
+    return this.uid || localStorage.getItem('uid');
   }
 }
