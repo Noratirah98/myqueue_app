@@ -16,6 +16,7 @@ import { StorageService } from '../services/storage.service';
 import { MainService } from '../services/main.service';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { AuthGuard } from '../guards/auth.guard';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-home',
@@ -54,11 +55,15 @@ export class HomePage implements OnInit {
     private auth: AuthService,
     private authGuard: AuthGuard,
     private storage: StorageService,
+    private pushService: NotificationService,
     private alertController: AlertController,
     private loadingController: LoadingController
   ) {}
 
-  ngOnInit() {}
+  async ngOnInit() {
+    // Initialize push notifications after successful login
+    await this.pushService.initPushNotifications();
+  }
 
   ngOnDestroy() {
     // IMPORTANT: Clean up listeners when leaving page

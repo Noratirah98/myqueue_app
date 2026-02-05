@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { register } from 'swiper/element/bundle';
+import { Platform } from '@ionic/angular';
 
 register();
 
@@ -22,5 +23,15 @@ export class AppComponent {
     { title: 'Spam', url: '/folder/spam', icon: 'warning' },
   ];
   public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+
+  constructor(private platform: Platform) {
+    this.initializeApp();
+  }
+
+  initializeApp() {
+    this.platform.ready().then(() => {
+      console.log('Platform ready');
+      // Push will be initialized after login
+    });
+  }
 }
