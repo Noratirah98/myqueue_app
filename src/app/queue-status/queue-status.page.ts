@@ -4,6 +4,8 @@ import { AlertController } from '@ionic/angular';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
 import { MainService } from '../services/main.service';
 import { AuthGuard } from '../guards/auth.guard';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-queue-status',
@@ -43,8 +45,8 @@ export class QueueStatusPage implements OnInit {
   constructor(
     private router: Router,
     public main: MainService,
-    private authGuard: AuthGuard,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private pushNotifService: NotificationService
   ) {
     // this.authGuard.canActivate();
   }
@@ -122,7 +124,6 @@ export class QueueStatusPage implements OnInit {
 
       if (this.currentServingKey === this.myQueueKey) {
         this.status = 'serving';
-        console.log('🎉 YOUR TURN!');
 
         // Show notification only once
         if (!this.hasShownYourTurnAlert) {
@@ -228,19 +229,16 @@ export class QueueStatusPage implements OnInit {
     });
   }
 
-  // NEW: Show YOUR TURN notification with multiple alerts
+  // Show YOUR TURN notification with multiple alerts
   private async showYourTurnNotification() {
-    console.log('🎉 Showing YOUR TURN notification');
-
-    // 1. Vibrate (3 short bursts)
-    if ('vibrate' in navigator) {
-      navigator.vibrate([200, 100, 200, 100, 200]);
+    // 1. Native haptic feedback (Android reliable)
+    try {
+      await Haptics.impact({ style: ImpactStyle.Heavy });
+    } catch (e) {
+      console.log('Haptics not supported', e);
     }
 
-    // 2. Play sound (optional - uncomment if you want)
-    this.playNotificationSound();
-
-    // 3. Show Alert Popup
+    // 2. Show Alert Popup
     const alert = await this.alertController.create({
       header: "🎉 It's Your Turn!",
       message: `Queue ${this.myQueueNumberText}. Please proceed to the ${this.myQueueType} counter now. Thank you for your patience! 😊`,
@@ -252,6 +250,10 @@ export class QueueStatusPage implements OnInit {
           cssClass: 'alert-button-confirm',
           handler: () => {
             console.log('✅ User acknowledged YOUR TURN');
+
+            // Sound only on user interaction
+            this.pushNotifService.playSound();
+            Haptics.impact({ style: ImpactStyle.Light });
           },
         },
       ],
@@ -275,17 +277,17 @@ export class QueueStatusPage implements OnInit {
   }
 
   // Play notification sound
-  private playNotificationSound() {
-    try {
-      const audio = new Audio('assets/sounds/notification.mp3');
-      audio.volume = 0.5;
-      audio.play().catch((err) => {
-        console.log('Could not play sound:', err);
-      });
-    } catch (error) {
-      console.log('Audio not supported');
-    }
-  }
+  // private playNotificationSound() {
+  //   try {
+  //     const audio = new Audio('assets/sounds/notification.mp3');
+  //     audio.volume = 0.5;
+  //     audio.play().catch((err) => {
+  //       console.log('Could not play sound:', err);
+  //     });
+  //   } catch (error) {
+  //     console.log('Audio not supported');
+  //   }
+  // }
 
   private buildUpcomingQueue(allQueue: Array<{ key: number; data: any }>) {
     // Sort by key

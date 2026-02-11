@@ -101,11 +101,11 @@ body.scanner-active {
   .your-turn-alert {
     .alert-wrapper {
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(16, 220, 96, 0.3);
+      box-shadow: 0 10px 40px rgba(235, 68, 90, 0.35);
     }
 
     .alert-head {
-      background: linear-gradient(135deg, #10dc60 0%, #0ec254 100%);
+      background: linear-gradient(135deg, #eb445a 0%, #d93b52 100%);
       color: white;
       padding: 20px;
       border-radius: 16px 16px 0 0;
@@ -118,14 +118,14 @@ body.scanner-active {
     }
 
     .alert-message {
-      padding: 1rem!important;
+      padding: 1rem !important;
       font-size: 16px;
       line-height: 1.5;
     }
 
     .alert-button-confirm {
       font-weight: 700;
-      color: #10dc60;
+      color: #eb445a;
       font-size: 16px;
     }
   }

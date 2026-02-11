@@ -47,6 +47,10 @@ ion-header.modern-header {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: white;
 
+    ion-title {
+      text-align: center;
+    }
+
     ion-button ion-icon {
       color: white;
     }
@@ -520,11 +524,11 @@ ion-header.modern-header {
   .your-turn-alert {
     .alert-wrapper {
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(16, 220, 96, 0.3);
+      box-shadow: 0 10px 40px rgba(235, 68, 90, 0.35);
     }
 
     .alert-head {
-      background: linear-gradient(135deg, #10dc60 0%, #0ec254 100%);
+      background: linear-gradient(135deg, #eb445a 0%, #d93b52 100%);
       color: white;
       padding: 20px;
       border-radius: 16px 16px 0 0;
@@ -544,7 +548,7 @@ ion-header.modern-header {
 
     .alert-button-confirm {
       font-weight: 700;
-      color: #10dc60;
+      color: #eb445a;
       font-size: 16px;
     }
   }

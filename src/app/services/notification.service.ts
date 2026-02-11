@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
-import {
-  PushNotifications,
-  Token,
-  PushNotificationSchema,
-  ActionPerformed,
-  Channel,
-} from '@capacitor/push-notifications';
+import { PushNotifications, Token } from '@capacitor/push-notifications';
 import { getDatabase, ref, set } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
@@ -14,6 +8,9 @@ import { getAuth } from 'firebase/auth';
   providedIn: 'root',
 })
 export class NotificationService {
+  private notifAudio?: HTMLAudioElement;
+  private audioPrimed = false;
+
   constructor(private platform: Platform) {}
 
   /**
@@ -185,6 +182,37 @@ export class NotificationService {
     } catch (error) {
       console.error('Error requesting permission:', error);
       return false;
+    }
+  }
+
+  async primeAudioOnce() {
+    if (this.audioPrimed) return;
+
+    this.notifAudio = new Audio('assets/sounds/notification.mp3');
+    this.notifAudio.volume = 0.5;
+
+    try {
+      await this.notifAudio.play();
+      this.notifAudio.pause();
+      this.notifAudio.currentTime = 0;
+      this.audioPrimed = true;
+      console.log('✅ Audio primed');
+    } catch (e) {
+      console.log('❌ Audio prime blocked until user interaction', e);
+    }
+  }
+
+  playSound() {
+    try {
+      if (!this.notifAudio)
+        this.notifAudio = new Audio('assets/sounds/notification.mp3');
+      this.notifAudio.volume = 0.5;
+      this.notifAudio.currentTime = 0;
+      this.notifAudio
+        .play()
+        .catch((err) => console.log('Could not play sound:', err));
+    } catch {
+      console.log('Audio not supported');
     }
   }
 }

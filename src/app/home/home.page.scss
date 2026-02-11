@@ -83,9 +83,9 @@ ion-header.modern-header {
   }
 
   .center-title {
-    // position: absolute;
+    position: absolute;
     left: 50%;
-    // transform: translateX(-50%);
+    transform: translateX(-50%);
     text-align: center;
   }
 
@@ -1547,11 +1547,11 @@ ion-content.modern-content {
   .your-turn-alert {
     .alert-wrapper {
       border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(16, 220, 96, 0.3);
+      box-shadow: 0 10px 40px rgba(235, 68, 90, 0.35);
     }
 
     .alert-head {
-      background: linear-gradient(135deg, #10dc60 0%, #0ec254 100%);
+      background: linear-gradient(135deg, #eb445a 0%, #d93b52 100%);
       color: white;
       padding: 20px;
       border-radius: 16px 16px 0 0;
@@ -1571,7 +1571,7 @@ ion-content.modern-content {
 
     .alert-button-confirm {
       font-weight: 700;
-      color: #10dc60;
+      color: #eb445a;
       font-size: 16px;
     }
   }

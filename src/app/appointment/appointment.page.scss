@@ -52,6 +52,10 @@ ion-header.modern-header {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --color: #ffffff;
 
+    ion-title {
+      text-align: center;
+    }
+
     ion-button ion-icon {
       color: white;
     }
