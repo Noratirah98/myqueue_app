@@ -12,7 +12,29 @@ import {
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, NavController } from '@ionic/angular';
 import { MainService } from '../services/main.service';
-import { AuthGuard } from '../guards/auth.guard';
+import { Router } from '@angular/router';
+
+const CLINIC_TIME_SLOTS = [
+  // Morning
+  '08:00',
+  '08:30',
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  // Lunch / Pre-break
+  '12:00',
+  '12:30',
+  // Afternoon (after break)
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+];
 
 interface TimeSlot {
   time: string;
@@ -93,7 +115,6 @@ export class AppointmentPage implements OnInit {
     private fb: FormBuilder,
     private auth: AuthService,
     private main: MainService,
-    private authGuard: AuthGuard,
     private navCtrl: NavController,
     private alertController: AlertController
   ) {
@@ -140,14 +161,14 @@ export class AppointmentPage implements OnInit {
     this.appointmentForm.patchValue({ appointmentType: type.id });
 
     // Animate transition
-    setTimeout(() => {
+    setTimeout(async () => {
       this.currentStep = 2;
-      this.loadTimeSlots();
+      await this.loadTimeSlots();
     }, 200);
   }
 
   /* ================= STEP 2: DATE & TIME SELECTION ================= */
-  previousDate() {
+  async previousDate() {
     const d = new Date(this.selectedDateObj);
     d.setDate(d.getDate() - 1);
 
@@ -158,10 +179,10 @@ export class AppointmentPage implements OnInit {
 
     this.selectedDateObj = d;
     this.updateDisplayDate();
-    this.loadTimeSlots();
+    await this.loadTimeSlots();
   }
 
-  nextDate() {
+  async nextDate() {
     const d = new Date(this.selectedDateObj);
     d.setDate(d.getDate() + 1);
 
@@ -179,7 +200,7 @@ export class AppointmentPage implements OnInit {
 
     this.selectedDateObj = d;
     this.updateDisplayDate();
-    this.loadTimeSlots();
+    await this.loadTimeSlots();
   }
 
   getNextWorkingDay(date: Date): Date {
@@ -193,7 +214,7 @@ export class AppointmentPage implements OnInit {
     return nextDate;
   }
 
-  onCalendarSelected(value: string | string[] | null | undefined) {
+  async onCalendarSelected(value: string | string[] | null | undefined) {
     if (!value) return;
 
     const dateStr = Array.isArray(value) ? value[0] : value;
@@ -206,7 +227,7 @@ export class AppointmentPage implements OnInit {
 
     this.selectedDateObj = date;
     this.updateDisplayDate();
-    this.loadTimeSlots();
+    await this.loadTimeSlots();
   }
 
   isBlockedDate(date: Date): boolean {
@@ -260,39 +281,131 @@ export class AppointmentPage implements OnInit {
       .toUpperCase();
   }
 
-  loadTimeSlots() {
-    // In production, fetch from backend based on date and type
-    const morningSlots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'];
-    const afternoonSlots = [
-      '14:00',
-      '14:30',
-      '15:00',
-      '15:30',
-      '16:00',
-      '16:30',
-    ];
+  async loadTimeSlots() {
+    // Guard: make sure user already selected date + type
+    if (!this.selectedDateObj || !this.selectedType) {
+      this.timeSlots = CLINIC_TIME_SLOTS.map((t) => ({
+        time: t,
+        display: this.formatTime(t),
+        available: false,
+      }));
+      return;
+    }
 
-    const allSlots = [...morningSlots, ...afternoonSlots];
+    const selectedDateStr = this.formatDateToYMD(this.selectedDateObj);
 
-    this.timeSlots = allSlots.map((t) => ({
-      time: t,
-      display: this.formatTime(t),
-      available: Math.random() > 0.3, // Random availability for demo
-    }));
+    try {
+      const db = getDatabase();
+      const appointmentsRef = ref(db, 'appointments');
+      const dateQuery = query(
+        appointmentsRef,
+        orderByChild('date'),
+        equalTo(selectedDateStr)
+      );
+      const snapshot = await get(dateQuery);
+      const takenTimes = new Set<string>();
+
+      let userHasAppointmentOnDate = false;
+
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const a = child.val();
+
+          const status = String(a.status || '')
+            .toLowerCase()
+            .trim();
+          const isActive =
+            status === 'confirmed' ||
+            status === 'checked_in' ||
+            status === 'completed';
+
+          const typeMatches = a.appointmentType === this.selectedType?.name;
+
+          if (
+            isActive &&
+            a.date === selectedDateStr &&
+            typeMatches &&
+            typeof a.time === 'string'
+          ) {
+            const normalizedTime = this.normalizeTimeFormat(a.time);
+            takenTimes.add(normalizedTime);
+          }
+        });
+      }
+
+      // Map time slots with availability
+      this.timeSlots = CLINIC_TIME_SLOTS.map((t) => ({
+        time: t,
+        display: this.formatTime(t),
+        available: !takenTimes.has(t),
+      }));
+    } catch (error) {
+      console.error('❌ Error loading time slots:', error);
+
+      this.timeSlots = CLINIC_TIME_SLOTS.map((t) => ({
+        time: t,
+        display: this.formatTime(t),
+        available: false,
+      }));
+
+      await this.main.showToast(
+        'Error loading available times. Please try again.',
+        'danger',
+        'alert-circle'
+      );
+    }
+  }
+
+  normalizeTimeFormat(time: string): string {
+    if (!time) return '';
+
+    time = time.trim();
+
+    const hasAMPM = time.includes('AM') || time.includes('PM');
+
+    if (!hasAMPM) {
+      return time;
+    }
+
+    const timeOnly = time.replace(/\s*(AM|PM)\s*/gi, '').trim();
+    const isPM = /PM/i.test(time);
+
+    const [hours, minutes] = timeOnly.split(':');
+    let hour = parseInt(hours, 10);
+
+    if (isPM && hour !== 12) {
+      hour += 12;
+    } else if (!isPM && hour === 12) {
+      hour = 0;
+    }
+
+    const hourStr = String(hour).padStart(2, '0');
+    const minStr = minutes || '00';
+
+    return `${hourStr}:${minStr}`;
   }
 
   getMorningSlots(): TimeSlot[] {
-    return this.timeSlots.filter((slot) => {
-      const hour = parseInt(slot.time.split(':')[0]);
-      return hour < 12;
-    });
+    return this.timeSlots.filter(
+      (s) => parseInt(s.time.split(':')[0], 10) < 12
+    );
+  }
+
+  getMiddaySlots(): TimeSlot[] {
+    return this.timeSlots.filter((s) => s.time.startsWith('12:'));
   }
 
   getAfternoonSlots(): TimeSlot[] {
-    return this.timeSlots.filter((slot) => {
-      const hour = parseInt(slot.time.split(':')[0]);
-      return hour >= 12;
-    });
+    return this.timeSlots.filter(
+      (s) => parseInt(s.time.split(':')[0], 10) >= 14
+    );
+  }
+
+  formatDateToYMD(dateObj: Date): string {
+    const y = dateObj.getFullYear();
+    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const d = String(dateObj.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   selectSlot(slot: TimeSlot) {
@@ -373,7 +486,7 @@ export class AppointmentPage implements OnInit {
 
       if (alreadyExists) {
         await this.main.showToast(
-          'You already have an appointment on this date',
+          'You already have an appointment on this date.',
           'warning',
           'alert-circle-outline',
           'top'

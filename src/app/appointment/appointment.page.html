@@ -156,6 +156,23 @@
             </div>
           </div>
 
+          <!-- Midday Slots -->
+          <div class="time-period">
+            <div class="period-label">
+              <ion-icon name="cafe-outline"></ion-icon>
+              <span>Midday</span>
+            </div>
+            <div class="time-grid">
+              <button *ngFor="let slot of getMiddaySlots()" class="time-slot" [class.unavailable]="!slot.available"
+                [class.selected]="selectedSlot?.time === slot.time" [disabled]="!slot.available"
+                (click)="selectSlot(slot)">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ slot.display }}</span>
+                <ion-badge *ngIf="!slot.available" color="danger">Full</ion-badge>
+              </button>
+            </div>
+          </div>
+
           <!-- Afternoon Slots -->
           <div class="time-period">
             <div class="period-label">
@@ -180,8 +197,9 @@
         <ion-card-content>
           <ion-icon name="information-circle-outline"></ion-icon>
           <div class="info-text">
-            <strong>Note:</strong> Clinic operates Monday - Friday, 9:00 AM - 5:00 PM. Weekends and public holidays are
-            closed.
+            <strong>Note:</strong> Clinic operates Monday to Friday, 8:00 AM – 5:00 PM,
+            with a lunch break from 1:00 PM to 2:00 PM.
+            Weekends and public holidays are closed.
           </div>
         </ion-card-content>
       </ion-card>
