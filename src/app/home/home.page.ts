@@ -61,6 +61,7 @@ export class HomePage implements OnInit {
 
   // Track actual queue status
   myQueueStatus: string = 'waiting';
+  private hasShownYourTurnAlert = false;
 
   // Store listener references for cleanup
   private queueListener: any = null;
@@ -217,14 +218,12 @@ export class HomePage implements OnInit {
       return;
     }
 
-    // Store for later use
     this.myQueueKey = this.nextAppointment.queueKey;
     this.myClinicType = clinicType;
     this.myQueueDate = today;
 
     this.stopQueueListeners();
 
-    // 1. Listen to queue changes
     const queuePath = `queues/${today}/${clinicType}`;
     const queueRef = ref(db, queuePath);
 
@@ -260,18 +259,41 @@ export class HomePage implements OnInit {
         return;
       }
 
-      // ✅ Store the actual queue status
-      this.myQueueStatus = myQueue.status || 'waiting';
+      // Store previous status BEFORE updating
+      const previousStatus = this.myQueueStatus;
+      const newStatus = myQueue.status || 'waiting';
+
+      // Update status
+      this.myQueueStatus = newStatus;
+
+      // Detect status changes and trigger notifications
+      if (previousStatus === 'serving' && newStatus === 'waiting') {
+        // SKIPPED
+        console.log('⚠️ SKIP DETECTED!');
+
+        this.main.showToast(
+          'You were skipped. Please wait to be called again.',
+          'warning',
+          'alert-circle-outline'
+        );
+
+        // Reset flag
+        this.hasShownYourTurnAlert = false;
+      } else if (previousStatus === 'waiting' && newStatus === 'serving') {
+        if (!this.hasShownYourTurnAlert) {
+          this.showYourTurnNotification();
+          this.hasShownYourTurnAlert = true;
+        }
+      }
 
       // Update queue info
       this.hasActiveQueue = true;
       this.userQueueNumber = myQueue.queueNumberText || '';
 
-      // Calculate people ahead - ONLY count "waiting" entries
+      // Calculate people ahead
       let ahead = 0;
       for (const [key, value] of Object.entries(queueData)) {
         const queue: any = value;
-        // Only count entries with status "waiting" (not "serving" or "missed")
         if (queue.status === 'waiting' && parseInt(key) < myQueueKey) {
           ahead++;
         }
@@ -279,17 +301,12 @@ export class HomePage implements OnInit {
 
       this.peopleAhead = ahead;
       this.estimatedWaitTime = ahead * 5;
-
-      console.log(
-        `📊 People ahead: ${ahead}, Queue: ${this.userQueueNumber}, Status: ${this.myQueueStatus}`
-      );
     });
 
-    // 2. Listen to current serving (REAL-TIME!)
     this.loadCurrentServingRealTime(today, clinicType);
   }
 
-  /* ✅ NEW: Handle queue missed/skipped by staff */
+  /* Handle queue missed/skipped by staff */
   async handleQueueMissed() {
     // Vibrate to alert user
     if ('vibrate' in navigator) {
@@ -328,7 +345,8 @@ export class HomePage implements OnInit {
     console.log('⚠️ Queue state cleared after miss');
   }
 
-  /* Real-time current serving with YOUR TURN detection */
+  /* Real-time current serving with detection */
+  /* Real-time current serving with YOUR TURN detection + SKIP HANDLER */
   loadCurrentServingRealTime(date: string, type: string) {
     const db = getDatabase();
     const currentPath = `currentQueue/${date}/${type}`;
@@ -339,22 +357,58 @@ export class HomePage implements OnInit {
         const data = snapshot.val();
         const servingKey = data.currentNumber || data.currentKey;
 
+        if (this.myQueueStatus === 'serving') {
+          console.log('⚠️ Current serving cleared, returning to waiting');
+          this.myQueueStatus = 'waiting';
+
+          this.main.showToast(
+            'You were skipped. Please wait to be called again.',
+            'warning',
+            'alert-circle-outline'
+          );
+        }
+
         // Format display number
         this.currentServingNumber = this.formatQueueNumberFromKey(
           servingKey,
           type
         );
 
-        console.log('📢 Current serving:', this.currentServingNumber);
+        // Check if it's turn
+        if (servingKey === this.myQueueKey) {
+          // Only show notification if status is actually 'serving'
+          if (this.myQueueStatus === 'serving') {
+            this.showYourTurnNotification();
+          }
+        } else {
+          // Someone else is being served
+          if (this.myQueueStatus === 'serving') {
+            console.log('⚠️ Different patient now serving - I was skipped');
+            this.myQueueStatus = 'waiting';
 
-        if (
-          servingKey === this.myQueueKey &&
-          this.myQueueStatus === 'serving'
-        ) {
-          this.showYourTurnNotification();
+            this.main.showToast(
+              'You were skipped. Please wait to be called again.',
+              'warning',
+              'alert-circle-outline'
+            );
+          }
         }
       } else {
+        // Current serving cleared (no one being served)
         this.currentServingNumber = '-';
+
+        // If was serving and now cleared, return to waiting
+        if (this.myQueueStatus === 'serving') {
+          console.log('⚠️ Serving cleared - returned to waiting');
+          this.myQueueStatus = 'waiting';
+
+          // Show notification to user
+          this.main.showToast(
+            'You were skipped. Please wait to be called again.',
+            'warning',
+            'alert-circle-outline'
+          );
+        }
       }
     });
   }
@@ -443,6 +497,9 @@ export class HomePage implements OnInit {
       this.currentServingListener = null;
       console.log('🔥 Current serving listener stopped');
     }
+
+    // ✅ Reset flag
+    this.hasShownYourTurnAlert = false;
   }
 
   normalizeAppointmentType(type: string): string {

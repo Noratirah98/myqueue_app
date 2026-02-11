@@ -111,6 +111,18 @@ export class QueueStatusPage implements OnInit {
       if (!snap.exists()) {
         this.currentServingKey = 0;
         this.currentServingText = '—';
+
+        if (this.status === 'serving') {
+          console.log('⚠️ Current serving cleared, returning to waiting');
+          this.status = 'waiting';
+          this.hasShownYourTurnAlert = false;
+
+          this.main.showToast(
+            'You were skipped. Please wait to be called again.',
+            'warning',
+            'alert-circle-outline'
+          );
+        }
         return;
       }
 
@@ -129,6 +141,17 @@ export class QueueStatusPage implements OnInit {
         if (!this.hasShownYourTurnAlert) {
           this.showYourTurnNotification();
           this.hasShownYourTurnAlert = true;
+        }
+        // Add else block to reset if not my turn anymore
+        else if (
+          this.status === 'serving' &&
+          this.currentServingKey !== this.myQueueKey
+        ) {
+          console.log(
+            '⚠️ Someone else is being served now, returning to waiting'
+          );
+          this.status = 'waiting';
+          this.hasShownYourTurnAlert = false; // Reset alert flag
         }
       }
     });
@@ -290,15 +313,8 @@ export class QueueStatusPage implements OnInit {
   // }
 
   private buildUpcomingQueue(allQueue: Array<{ key: number; data: any }>) {
-    // Sort by key
     allQueue.sort((a, b) => a.key - b.key);
 
-    // Filter only waiting and serving
-    const active = allQueue.filter(
-      (q) => q.data?.status === 'waiting' || q.data?.status === 'serving'
-    );
-
-    // Get current serving + next 4
     const upcoming: Array<{
       key: number;
       numberText: string;
@@ -306,37 +322,31 @@ export class QueueStatusPage implements OnInit {
       isServing: boolean;
     }> = [];
 
-    // Add current serving if exists
-    if (this.currentServingKey > 0) {
-      const servingEntry = allQueue.find(
-        (q) => q.key === this.currentServingKey
-      );
-      if (servingEntry) {
-        upcoming.push({
-          key: servingEntry.key,
-          numberText: this.getQueueNumberText(servingEntry),
-          isYou: servingEntry.key === this.myQueueKey,
-          isServing: true,
-        });
-      }
+    // 1. Find and add serving queue (based on actual status)
+    const servingQueue = allQueue.find((q) => q.data?.status === 'serving');
+    if (servingQueue) {
+      upcoming.push({
+        key: servingQueue.key,
+        numberText: this.getQueueNumberText(servingQueue),
+        isYou: servingQueue.key === this.myQueueKey,
+        isServing: true,
+      });
     }
 
-    // Add next 4 waiting
-    const waiting = active.filter((q) => q.data?.status === 'waiting');
-    const nextFour = waiting.slice(0, 4);
+    // 2. Add waiting queues
+    const waitingQueues = allQueue.filter((q) => q.data?.status === 'waiting');
+    const maxToShow = servingQueue ? 4 : 5;
 
-    nextFour.forEach((q) => {
-      if (q.key !== this.currentServingKey) {
-        upcoming.push({
-          key: q.key,
-          numberText: this.getQueueNumberText(q),
-          isYou: q.key === this.myQueueKey,
-          isServing: false,
-        });
-      }
+    waitingQueues.slice(0, maxToShow).forEach((q) => {
+      upcoming.push({
+        key: q.key,
+        numberText: this.getQueueNumberText(q),
+        isYou: q.key === this.myQueueKey,
+        isServing: false,
+      });
     });
 
-    this.upcomingQueue = upcoming.slice(0, 5);
+    this.upcomingQueue = upcoming;
   }
 
   private getQueueNumberText(entry: { key: number; data: any }): string {
