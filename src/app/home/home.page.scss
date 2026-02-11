@@ -1458,6 +1458,53 @@ ion-content.modern-content {
   }
 }
 
+// MISSED QUEUE ALERT STYLING
+.missed-queue-alert {
+  .alert-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .alert-head {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+
+    h2 {
+      color: white !important;
+      font-weight: 700;
+      font-size: 20px;
+      margin: 0;
+    }
+  }
+
+  .alert-message {
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    text-align: center;
+  }
+
+  .alert-button-group {
+    padding: 0 20px 20px 20px;
+
+    button {
+      border-radius: 12px;
+      height: 48px;
+      font-weight: 600;
+      font-size: 16px;
+      text-transform: none;
+    }
+
+    .alert-button-confirm {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      color: white;
+    }
+  }
+}
+
 // add check in note
 .checkin-window-note {
   margin: 10px 0 12px;

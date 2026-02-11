@@ -198,7 +198,7 @@ export class HomePage implements OnInit {
     });
   }
 
-  /* ✅ UPDATED: Load Queue Status with Real-Time Monitoring */
+  /* Load Queue Status with Real-Time Monitoring + MISSED HANDLER */
   loadQueueStatus() {
     const uid = this.auth.getUID();
     if (!uid || !this.nextAppointment) {
@@ -222,10 +222,7 @@ export class HomePage implements OnInit {
     this.myClinicType = clinicType;
     this.myQueueDate = today;
 
-    // Stop previous listeners
     this.stopQueueListeners();
-
-    console.log('🔥 Starting real-time queue monitoring...');
 
     // 1. Listen to queue changes
     const queuePath = `queues/${today}/${clinicType}`;
@@ -248,30 +245,33 @@ export class HomePage implements OnInit {
       const myQueue = queueData[myQueueKey];
 
       if (!myQueue) {
-        console.log('✅ Queue entry removed');
         this.hasActiveQueue = false;
         this.stopQueueListeners();
         return;
       }
 
       if (myQueue.status === 'completed') {
-        console.log('✅ Service completed!');
         this.handleServiceCompleted();
         return;
       }
 
-      // ✅ FIX: Store the actual queue status
+      if (myQueue.status === 'missed') {
+        this.handleQueueMissed();
+        return;
+      }
+
+      // ✅ Store the actual queue status
       this.myQueueStatus = myQueue.status || 'waiting';
 
       // Update queue info
       this.hasActiveQueue = true;
       this.userQueueNumber = myQueue.queueNumberText || '';
 
-      // ✅ FIX: Calculate people ahead - ONLY count "waiting" entries
+      // Calculate people ahead - ONLY count "waiting" entries
       let ahead = 0;
       for (const [key, value] of Object.entries(queueData)) {
         const queue: any = value;
-        // Only count entries with status "waiting" (not "serving")
+        // Only count entries with status "waiting" (not "serving" or "missed")
         if (queue.status === 'waiting' && parseInt(key) < myQueueKey) {
           ahead++;
         }
@@ -287,6 +287,45 @@ export class HomePage implements OnInit {
 
     // 2. Listen to current serving (REAL-TIME!)
     this.loadCurrentServingRealTime(today, clinicType);
+  }
+
+  /* ✅ NEW: Handle queue missed/skipped by staff */
+  async handleQueueMissed() {
+    // Vibrate to alert user
+    if ('vibrate' in navigator) {
+      navigator.vibrate([100, 50, 100, 50, 100]);
+    }
+
+    // Show alert
+    const alert = await this.alertController.create({
+      header: 'Queue Skipped ⚠️',
+      message: `Your queue number ${this.userQueueNumber} was skipped because you didn't respond when called. Please approach the counter immediately or get a new queue number.`,
+      cssClass: 'missed-queue-alert',
+      buttons: [
+        {
+          text: 'Understood',
+          role: 'confirm',
+          cssClass: 'alert-button-confirm',
+        },
+      ],
+      backdropDismiss: false,
+    });
+
+    await alert.present();
+
+    // Clear queue state after user acknowledges
+    await alert.onDidDismiss();
+
+    // Clear queue display
+    this.hasActiveQueue = false;
+    this.userQueueNumber = '';
+    this.currentServingNumber = '-';
+    this.peopleAhead = 0;
+    this.estimatedWaitTime = 0;
+    this.myQueueStatus = 'waiting';
+    this.stopQueueListeners();
+
+    console.log('⚠️ Queue state cleared after miss');
   }
 
   /* Real-time current serving with YOUR TURN detection */
