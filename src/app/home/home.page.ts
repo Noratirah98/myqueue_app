@@ -10,6 +10,7 @@ import {
   query,
   ref,
   off,
+  update,
 } from 'firebase/database';
 import { AuthService } from '../services/auth.service';
 import { StorageService } from '../services/storage.service';
@@ -17,6 +18,25 @@ import { MainService } from '../services/main.service';
 import { AlertController, LoadingController } from '@ionic/angular';
 import { AuthGuard } from '../guards/auth.guard';
 import { NotificationService } from '../services/notification.service';
+import { AppointmentStatus } from '../appointment-list/appointment-list.page';
+
+export interface Appointment {
+  id: string;
+  uid: string;
+  appointmentType: string;
+  date: string;
+  time: string;
+  status: AppointmentStatus;
+  createdAt?: string;
+  symptoms?: string;
+  notes?: string;
+  // Queue-related fields
+  queueKey?: number;
+  queueNumberText?: string;
+  checkInAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+}
 
 @Component({
   selector: 'app-home',
@@ -434,8 +454,49 @@ export class HomePage implements OnInit {
     this.router.navigate(['/appointment-list']);
   }
 
+  viewAppointmentDetails(appointment: any) {
+    this.router.navigate(['/appointment-list']);
+  }
+
   scanQRCode() {
     this.router.navigate(['/scan']);
+  }
+
+  canCheckInNow(appt: any): boolean {
+    if (!appt?.date || !appt?.time) return false;
+
+    const apptDT = new Date(`${appt.date} ${appt.time}`);
+    const now = new Date();
+
+    const earliest = new Date(apptDT);
+    earliest.setMinutes(earliest.getMinutes() - 30);
+
+    const latest = new Date(apptDT);
+    latest.setMinutes(latest.getMinutes() + 60);
+
+    return now >= earliest && now <= latest;
+  }
+
+  getCheckInHintText(appt: any): string {
+    if (!appt?.date || !appt?.time)
+      return 'Check-in is not available at the moment.';
+
+    const apptDT = new Date(`${appt.date} ${appt.time}`);
+    const now = new Date();
+
+    const earliest = new Date(apptDT);
+    earliest.setMinutes(earliest.getMinutes() - 30);
+
+    const latest = new Date(apptDT);
+    latest.setMinutes(latest.getMinutes() + 60);
+
+    if (now < earliest) {
+      return `Check-in will open 30 minutes before your appointment time (${appt.time}).`;
+    }
+    if (now > latest) {
+      return 'Your check-in window has ended. Please contact clinic staff for assistance.';
+    }
+    return '';
   }
 
   viewFullQueueStatus() {
@@ -463,54 +524,49 @@ export class HomePage implements OnInit {
     this.router.navigate(['/queue-status']);
   }
 
-  viewAppointmentDetails(appointment: any) {
-    this.router.navigate(['/appointment-list']);
+  async cancelAppointment(appt: Appointment) {
+    const alert = await this.alertController.create({
+      header: 'Cancel Appointment?',
+      message: 'Are you sure you want to cancel this appointment?',
+      buttons: [
+        { text: 'No', role: 'cancel' },
+        {
+          text: 'Yes, Cancel',
+          role: 'destructive',
+          handler: async () => {
+            await this.processCancellation(appt);
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
-  async cancelAppointment(appointment: any) {
-    const confirm = await this.main.presentConfirm(
-      'Cancel Appointment',
-      'Are you sure you want to cancel this appointment?',
-      'Yes, Cancel',
-      'No',
-      async () => {
-        try {
-          const db = getDatabase();
-          await get(ref(db, `appointments/${appointment.id}/status`)).then(
-            async (snap) => {
-              if (snap.exists()) {
-                const appointmentRef = ref(
-                  db,
-                  `appointments/${appointment.id}`
-                );
-                await get(appointmentRef).then(async (snapshot) => {
-                  if (snapshot.exists()) {
-                    const updates: any = {};
-                    updates[`appointments/${appointment.id}/status`] =
-                      'cancelled';
+  async processCancellation(appointment: Appointment) {
+    const loading = await this.loadingController.create({
+      message: 'Cancelling appointment...',
+      duration: 1500,
+    });
 
-                    const dbRef = ref(db);
-                    await get(dbRef).then(() => {
-                      this.main.showToast(
-                        'Appointment cancelled',
-                        'success',
-                        'checkmark-done-outline'
-                      );
-                    });
-                  }
-                });
-              }
-            }
-          );
-        } catch (error) {
-          console.error('Error cancelling appointment:', error);
-          this.main.showToast(
-            'Error cancelling appointment',
-            'danger',
-            'alert-circle'
-          );
-        }
-      }
+    await loading.present();
+
+    const db = getDatabase();
+    const updates: any = {
+      status: 'cancelled',
+      cancelledAt: new Date().toISOString(),
+    };
+
+    await update(ref(db, `appointments/${appointment.id}`), updates);
+
+    appointment.status = 'cancelled';
+    appointment.cancelledAt = updates.cancelledAt;
+
+    await loading.dismiss();
+    await this.main.showToast(
+      'Appointment cancelled',
+      'success',
+      'checkmark-done-outline'
     );
   }
 

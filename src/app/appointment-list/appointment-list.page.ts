@@ -4,7 +4,6 @@ import {
   getDatabase,
   ref,
   get,
-  set,
   update,
   query,
   orderByChild,

@@ -464,6 +464,27 @@ ion-header.modern-header {
   }
 }
 
+// check In note
+.checkin-note {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #e3f2fd;
+  color: #1565c0;
+  border-left: 3px solid #1976d2;
+}
+
+.checkin-note strong {
+  color: #0d47a1;
+  font-weight: 600;
+}
+
+.qr-code-mr {
+  margin-right: 0.5rem;
+}
+
 // Animations
 @keyframes pulse {
   0%,

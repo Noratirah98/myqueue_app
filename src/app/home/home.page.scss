@@ -452,10 +452,10 @@ ion-content.modern-content {
   display: flex;
   gap: 1.5rem;
   align-items: center;
-  padding: 2rem;
+  padding: 1.25rem 2rem;
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border-radius: 20px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.15);
 
   .clinic-icon-large {
@@ -467,7 +467,7 @@ ion-content.modern-content {
     flex: 1;
 
     h2 {
-      font-size: 26px;
+      font-size: 23px;
       font-weight: 900;
       margin: 0 0 0.75rem 0;
       color: #78350f;
@@ -503,7 +503,7 @@ ion-content.modern-content {
     font-size: 18px;
     font-weight: 800;
     color: #1e293b;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 
     ion-icon {
       font-size: 28px;
@@ -1456,6 +1456,32 @@ ion-content.modern-content {
     --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
   }
+}
+
+// add check in note
+.checkin-window-note {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1565c0;
+  border-left: 3px solid #1976d2;
+}
+
+.checkin-window-note strong {
+  color: #0d47a1;
+  font-weight: 600;
+}
+
+.checkin-hint {
+  margin: 0.75rem 0.5rem;
+  font-size: 13px;
+  opacity: 0.85;
+  color: #b12a2a;
+  font-weight: 600;
 }
 
 // ============================================ RESPONSIVE ============================================

@@ -38,7 +38,7 @@
       <div class="card-header">
         <div>
           <h2>Ready to Check In</h2>
-          <p>Scan QR code at clinic counter</p>
+          <p>Scan QR code at clinic counter during your appointment time</p>
         </div>
         <ion-badge color="success">TODAY</ion-badge>
       </div>
@@ -72,6 +72,13 @@
         <ion-icon name="information-circle"></ion-icon>
         <span>How to Check In</span>
       </div>
+
+      <!-- Time Window Note (Only show when appointment exists) -->
+      <p class="checkin-note" *ngIf="hasValidAppointment">
+        Check-in is available <strong>30 minutes before</strong> your appointment time
+        and remains open up to <strong>60 minutes after</strong>.
+      </p>
+
       <div class="steps">
         <div class="step">
           <div class="step-number">1</div>
@@ -80,6 +87,7 @@
             <span class="step-desc">Locate your clinic counter</span>
           </div>
         </div>
+
         <div class="step">
           <div class="step-number">2</div>
           <div class="step-content">
@@ -87,18 +95,20 @@
             <span class="step-desc">Press the button below</span>
           </div>
         </div>
+
         <div class="step">
           <div class="step-number">3</div>
           <div class="step-content">
             <span class="step-title">Point at QR code</span>
-            <span class="step-desc">Align camera with code</span>
+            <span class="step-desc">Align your camera with the QR code</span>
           </div>
         </div>
+
         <div class="step">
           <div class="step-number">4</div>
           <div class="step-content">
-            <span class="step-title">Get queue number</span>
-            <span class="step-desc">Wait for confirmation</span>
+            <span class="step-title">Receive your queue number</span>
+            <span class="step-desc">Wait for the confirmation message</span>
           </div>
         </div>
       </div>
@@ -107,7 +117,7 @@
     <!-- Scan Button -->
     <ion-button expand="block" class="scan-btn" [disabled]="isScanning || isGenerating" (click)="startScan()">
       <ion-spinner *ngIf="isScanning || isGenerating"></ion-spinner>
-      <ion-icon *ngIf="!(isScanning || isGenerating)" name="qr-code"></ion-icon>
+      <ion-icon *ngIf="!(isScanning || isGenerating)" name="qr-code" class="qr-code-mr"></ion-icon>
       <span>{{ getScanButtonText() }}</span>
     </ion-button>
 

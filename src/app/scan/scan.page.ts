@@ -15,10 +15,8 @@ import {
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { MainService } from '../services/main.service';
 import { AuthService } from '../services/auth.service';
-import { AuthGuard } from '../guards/auth.guard';
 import { NotificationService } from '../services/notification.service';
-
-type AppointmentStatus = 'confirmed' | 'cancelled' | 'completed' | 'checked_in';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-scan',
@@ -64,6 +62,7 @@ export class ScanPage implements OnInit, OnDestroy {
     private router: Router,
     public main: MainService,
     private auth: AuthService,
+    private alertController: AlertController,
     private pushNotifService: NotificationService
   ) {}
 
@@ -117,6 +116,16 @@ export class ScanPage implements OnInit, OnDestroy {
       return;
     }
 
+    // Check time before scanning
+    const timeCheck = this.checkCheckInTime(this.todayAppointment);
+
+    if (!timeCheck.allowed) {
+      if (timeCheck.reason) {
+        await this.checkInTimeAlert(timeCheck.reason);
+      }
+      return;
+    }
+
     if (this.isScanning || this.isGenerating) return;
 
     try {
@@ -152,7 +161,7 @@ export class ScanPage implements OnInit, OnDestroy {
       this.content_visibility = '';
 
       if (!result?.hasContent) {
-        return; // User cancelled
+        return;
       }
 
       await this.handleQRResult(result.content ?? '');
@@ -166,6 +175,69 @@ export class ScanPage implements OnInit, OnDestroy {
       this.content_visibility = '';
       this.isScanning = false;
     }
+  }
+
+  /* -------------------- CHECK CHECK-IN TIME -------------------- */
+  checkCheckInTime(appointment: any): {
+    allowed: boolean;
+    reason?: 'early' | 'late';
+  } {
+    if (!appointment?.date || !appointment?.time) {
+      return { allowed: false };
+    }
+
+    const appointmentDateTime = new Date(
+      `${appointment.date} ${appointment.time}`
+    );
+
+    const now = new Date();
+    const earlyMinutes = 30;
+    const lateMinutes = 60;
+
+    const earliestCheckIn = new Date(appointmentDateTime);
+    earliestCheckIn.setMinutes(earliestCheckIn.getMinutes() - earlyMinutes);
+
+    const latestCheckIn = new Date(appointmentDateTime);
+    latestCheckIn.setMinutes(latestCheckIn.getMinutes() + lateMinutes);
+
+    if (now < earliestCheckIn) {
+      return { allowed: false, reason: 'early' };
+    }
+
+    if (now > latestCheckIn) {
+      return { allowed: false, reason: 'late' };
+    }
+
+    return { allowed: true };
+  }
+
+  /* -------------------- CHECK-IN TIME ALERT -------------------- */
+  async checkInTimeAlert(reason: 'early' | 'late') {
+    let header = '';
+    let message = '';
+
+    if (reason === 'early') {
+      header = 'Check-In Not Available Yet';
+      message =
+        `Your appointment is scheduled at ${this.todayAppointment?.time}.\n\n` +
+        `Please return to check in 30 minutes before your appointment time.`;
+    }
+
+    if (reason === 'late') {
+      header = 'Check-In Time Expired';
+      message =
+        'The check-in period for your appointment has passed.\n\n' +
+        'Please contact the clinic staff for further assistance.';
+    }
+
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK'],
+      backdropDismiss: false,
+    });
+
+    await alert.present();
   }
 
   stopScan() {
